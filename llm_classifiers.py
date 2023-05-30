@@ -128,7 +128,7 @@ def generate_predictions_df(input_texts, gold_labels, checkpoint, dict_task, ins
     df = pd.DataFrame({'text': input_texts, 'gold_label': gold_labels, 'prediction': predictions, 'prompt': prompts, 'time': time})
 
     # Save to output file
-    current_time = datetime.datetime.now()
+    current_time = datetime.datetime.now().strftime("%d_%B_%Y_%H_%M_%S")
     output_file_with_time = f'{output_file}/{checkpoint.split("/")[-1]}_{current_time}.tsv'
     df.to_csv(output_file_with_time, sep="\t", index=False)
     
