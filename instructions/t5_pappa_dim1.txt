@@ -1,0 +1,1 @@
+Label the following sentence with the role of the father in the life of mother and child. Labels are "passive", "active_pos_caring", "active_pos_challenging", "active_pos_other", "active_neg", or "na". Sentence: 
