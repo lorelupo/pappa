@@ -5,6 +5,8 @@ import collections
 import torch
 import datetime
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from sklearn.metrics import cohen_kappa_score, accuracy_score
+
 
 def read_data_pappa(path_data):
     # Read the xlsx data file to table
@@ -23,7 +25,6 @@ def generate_predictions_df(
         checkpoint,
         cache_dir,
         len_max_model,
-        output_file,
         ):
 
     # Check if cuda is available
@@ -125,11 +126,52 @@ def generate_predictions_df(
     else:
         raise ValueError('The gold labels must be either a list or a DataFrame.')
 
-    # Save to output file
-    current_time = datetime.datetime.now().strftime("%d%m_%H%M%S")
-    output_file_with_time = f'{output_file}/{checkpoint.split("/")[-1]}_{current_time}.tsv'
-    df_out.to_csv(output_file_with_time, sep="\t", index=False)
-    
+    return df_out
+
+def evaluate_predictions(df_predictions):
+
+    # retrieve columns starting with "gold" and their "names"
+    gold_labels = df_predictions.filter(regex='^gold', axis=1)
+    gold_names = [col.split('gold_')[-1] for col in gold_labels.columns]
+    human_names = [name for name in gold_names if 'agg' not in name]
+
+    # define tables where to store results
+    df_kappa = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+    df_accuracy = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+
+
+    for i, col in enumerate(gold_labels.columns):
+        # compare agreement with gold labels
+        kappa = cohen_kappa_score(df_predictions['prediction'].astype(str), gold_labels[col].astype(str))
+        accuracy = accuracy_score(df_predictions['prediction'].astype(str), gold_labels[col].astype(str))
+        # store results
+        df_kappa.loc['model', gold_names[i]] = df_kappa.loc[gold_names[i], 'model'] = kappa
+        df_accuracy.loc['model', gold_names[i]] = df_accuracy.loc[gold_names[i], 'model'] = accuracy
+
+        for j, col2 in enumerate(gold_labels.columns):
+            if i < j:
+                # compare agreement of gold labels with each other
+                kappa = cohen_kappa_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
+                accuracy = accuracy_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
+                # store results
+                df_kappa.loc[gold_names[i], gold_names[j]] = df_kappa.loc[gold_names[j], gold_names[i]] = kappa
+                df_accuracy.loc[gold_names[i], gold_names[j]] = df_accuracy.loc[gold_names[j], gold_names[i]] = accuracy
+
+    # compute average agreement between humans
+    df_kappa['mean_human'] = df_kappa[human_names].mean(axis=1)
+    df_accuracy['mean_human'] = df_accuracy[human_names].mean(axis=1)
+    for name in human_names:
+        # correct for humans fully agreeing with themselves
+        df_kappa.mean_human[name] = (df_kappa[human_names].loc[name].sum() - 1.0) / (len(human_names) - 1.0)
+        df_accuracy.mean_human[name] = (df_accuracy[human_names].loc[name].sum() - 1.0) / (len(human_names) - 1.0)
+
+    print('ACCURACY:')
+    print(df_accuracy, '\n')
+    print('KAPPA:')
+    print(df_kappa)
+    print()
+
+    return df_accuracy, df_kappa
 
 def main():
     
@@ -169,8 +211,8 @@ def main():
     # Read input_text and gold_labels from data_file selecting the right loading function
     input_texts, gold_labels = dict_task_func[args.task](args.data_file)
 
-
-    generate_predictions_df(
+    # Label the input_texts with the model
+    df = generate_predictions_df(
         input_texts=input_texts,
         instruction=args.instruction,
         output_prompt=args.output_prompt,
@@ -179,15 +221,17 @@ def main():
         checkpoint=args.checkpoint,
         cache_dir=args.cache_dir,
         len_max_model=args.len_max_model,
-        output_file=args.output_file,
         )
+    
+    # Evaluate model's labels
+    df_accuracy, df_kappa = evaluate_predictions(df)
+
+    # Save to output files
+    current_time = datetime.datetime.now().strftime("%d%m_%H%M%S")
+    output_file_name = f'{args.output_file}/{args.task}_{args.checkpoint.split("/")[-1]}_{current_time}'
+    df.to_csv(output_file_name + '.pre.csv', sep=";", index=False)
+    df_accuracy.to_csv(output_file_name + '.acc.csv', sep=";", index=False)
+    df_kappa.to_csv(output_file_name + '.kap.csv', sep=";", index=False)
 
 if __name__ == "__main__":
     main()
-
-# python example_llms.py \
-#     --data_file 'data/human_annotation/ELINsample_for_check_human.xlsx' \
-#         --checkpoint 'google/flan-t5-small' \
-#             --task 'pappa' \
-#                 --instruction  'instructions/t5_pappa_dim1.txt' \
-#                     --output_file 'results'
