@@ -6,31 +6,25 @@ import torch
 import datetime
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-def read_data_pappa_dim1(path_data):
+def read_data_pappa(path_data):
     # Read the xlsx data file to table
-    df = pd.read_excel(path_data, sheet_name='main')
+    df = pd.read_csv(path_data, sep=';')
     # Read text and labels
     input_texts = [text[:-1] + '.' if not text.endswith('.') else text for text in df['text_clean'].tolist()]
-    gold_labels = [df['dim1'].tolist(), df['dim2'].tolist(), df['dim3'].tolist()]
-    return input_texts, gold_labels[0]
+    gold_labels = df[['elin', 'lena', 'oscar', 'agg']]
+    return input_texts, gold_labels
 
-def read_data_pappa_dim2(path_data):
-    # Read the xlsx data file to table
-    df = pd.read_excel(path_data, sheet_name='main')
-    # Read text and labels
-    input_texts = [text[:-1] + '.' if not text.endswith('.') else text for text in df['text_clean'].tolist()]
-    gold_labels = [df['dim1'].tolist(), df['dim2'].tolist(), df['dim3'].tolist()]
-    return input_texts, gold_labels[1]
-
-def read_data_pappa_dim3(path_data):
-    # Read the xlsx data file to table
-    df = pd.read_excel(path_data, sheet_name='main')
-    # Read text and labels
-    input_texts = [text[:-1] + '.' if not text.endswith('.') else text for text in df['text_clean'].tolist()]
-    gold_labels = [df['dim1'].tolist(), df['dim2'].tolist(), df['dim3'].tolist()]
-    return input_texts, gold_labels[2]
-
-def generate_predictions_df(input_texts, gold_labels, checkpoint, dict_task, instruction, output_file, len_max_model):
+def generate_predictions_df(
+        input_texts,
+        instruction,
+        output_prompt,
+        dict_labels,
+        gold_labels,
+        checkpoint,
+        cache_dir,
+        len_max_model,
+        output_file,
+        ):
 
     # Check if cuda is available
     print(f'Running on {torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")} device...')
@@ -38,9 +32,8 @@ def generate_predictions_df(input_texts, gold_labels, checkpoint, dict_task, ins
     # Create an empty DataFrame with the desired column names
     df = pd.DataFrame(columns=['id', 'text', 'prompt', 'gold_label', 'prediction'])
 
-    tokenizer = AutoTokenizer.from_pretrained(checkpoint, cache_dir="~/.cache/huggingface/transformers")
-    model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint, torch_dtype="auto", device_map="auto", cache_dir="~/.cache/huggingface/transformers")
-
+    tokenizer = AutoTokenizer.from_pretrained(checkpoint, cache_dir=cache_dir)
+    model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint, torch_dtype="auto", device_map="auto", cache_dir=cache_dir)
     # Initialize empty lists for predictions and prompts
     predictions = []
     prompts = []
@@ -48,10 +41,11 @@ def generate_predictions_df(input_texts, gold_labels, checkpoint, dict_task, ins
     # Define the instruction and output strings for prompt formulation
     # If instruction is a path to a file, read the file, else use the instruction as is
     instruction = open(instruction, 'r').read() if os.path.isfile(instruction) else instruction
-    output = "Output:"
+    instruction = instruction.replace('\n', ' ')
+    output = output_prompt
 
     # Encode the labels
-    encoded_labels = tokenizer(list(dict_task.keys()), padding=True, truncation=True, return_tensors="pt")['input_ids']
+    encoded_labels = tokenizer(list(dict_labels.keys()), padding=True, truncation=True, return_tensors="pt")['input_ids']
     print(f'Encoded labels: \n{encoded_labels}')
     # Retrieve the tokens associated to encoded labels and print them
     # decoded_labels = tokenizer.batch_decode(encoded_labels)
@@ -84,7 +78,7 @@ def generate_predictions_df(input_texts, gold_labels, checkpoint, dict_task, ins
             # If inputs is longer then len_max_model, remove tokens from the encoded instruction
             len_inputs = inputs['input_ids'].shape[1]
             if len_inputs > len_max_model:
-                print(f'Input text length: {len_inputs}. Input will be truncated tpo {len_max_model} tokens.')
+                print(f'Input text length: {len_inputs}. Input will be truncated to {len_max_model} tokens.')
                 # get the number of tokens to remove from the encoded instruction
                 len_remove = len_inputs - len_max_model
                 # get the length of the output
@@ -108,29 +102,33 @@ def generate_predictions_df(input_texts, gold_labels, checkpoint, dict_task, ins
     torch.inference_mode(False)
 
     # Count the number of predictions of each type and print the result
-    prediction_counts = collections.Counter(predictions)
-    print(prediction_counts)
+    print(collections.Counter(predictions))
 
     # Lowercase the predictions
     predictions =  list(map(str.lower,predictions))
 
-    # Count the number of predictions of each type and print the result
-    prediction_counts = collections.Counter(predictions)
-    print(prediction_counts)
-
     # Map the predictions to the labels (or empty string if label not found)
-    predictions = [dict_task.get(word) for word in predictions]
-
-    prediction_counts = collections.Counter(predictions)
-    print(prediction_counts)
+    predictions = [dict_labels.get(word) for word in predictions]
+    
+    # Count the number of predictions of each type and print the result
+    print(collections.Counter(predictions))
 
     # Add the data to the DataFrame
-    df = pd.DataFrame({'text': input_texts, 'gold_label': gold_labels, 'prediction': predictions, 'prompt': prompts, 'time': time})
+    df_out = pd.DataFrame({'time': time, 'prompt': prompts, 'prediction': predictions})
+    
+    # Add the gold labels to df_out
+    if isinstance(gold_labels, pd.DataFrame):
+        for col in gold_labels.columns:
+            df_out['gold_' + col] = gold_labels[col]    
+    elif isinstance(gold_labels, list):
+        df_out['gold'] = gold_labels
+    else:
+        raise ValueError('The gold labels must be either a list or a DataFrame.')
 
     # Save to output file
-    current_time = datetime.datetime.now().strftime("%d_%B_%Y_%H_%M_%S")
+    current_time = datetime.datetime.now().strftime("%d%m_%H%M%S")
     output_file_with_time = f'{output_file}/{checkpoint.split("/")[-1]}_{current_time}.tsv'
-    df.to_csv(output_file_with_time, sep="\t", index=False)
+    df_out.to_csv(output_file_with_time, sep="\t", index=False)
     
 
 def main():
@@ -141,40 +139,47 @@ def main():
     required_args = parser.add_argument_group('required arguments')
     required_args.add_argument('--data_file', type=str, required=True,
                             help='The input data file. Should contain the .tsv file for the Hate Speech dataset.')
-    required_args.add_argument('--checkpoint', type=str, required=True,
-                            help='The model checkpoint.')
     required_args.add_argument('--task', type=str, required=True,
                             help='The task selected.')
     required_args.add_argument('--instruction', type=str, required=True,
                             help='The instruction for the prompt.')
+    required_args.add_argument('--output_prompt', type=str, required=True,
+                            help='The instruction for the prompt.')
+    required_args.add_argument('--checkpoint', type=str, required=True,
+                            help='The model checkpoint.')
+    required_args.add_argument('--cache_dir', type=str, required=True,
+                            help='Directory with HF models.')
+    required_args.add_argument('--len_max_model', type=int, required=True,
+                            help='Maximum sequence length of the LLM.')
     required_args.add_argument('--output_file', type=str, required=True,
                             help='File to write the results.')
-    required_args.add_argument('--len_max_model', type=int, required=True, default=512,
-                            help='Maximum sequence length of the LLM.')
     args = parser.parse_args()
 
-
-    dict_pappa_dim1 = {'na': 'na', 'passive': 'passive', 'active_neg': 'active_neg:', 'active_pos_challenging': 'active_pos_challenging', 'active_pos_caring': 'active_pos_caring', 'active_pos_other': 'active_pos_other'}
-    dict_pappa_dim1_reduced = {'na': 'na', 'passive': 'passive', 'active_neg': 'active_neg', 'active_pos': 'active_pos'}
-    dict_pappa_dim1_binary = {'na': 'na', 'passive': 'passive', 'active': 'active'}
-    dict_pappa_dim2 = {'explicit': 'explicit', 'implicit': 'implicit'}
-    dict_pappa_dim3 = {'descriptive': 'descriptive', 'ideal': 'ideal'}
-    #dict_hs = {'hate': 1, 'non-hate': 0}
+    # Build dictionary of labels {label: label_id}
+    dict_pappa_dim1 = {'na': 'NA', 'passive': 'PASSIVE', 'active_negative': 'ACTIVE_NEG', 'active_positive_challenging': 'ACTIVE_POS_CHALLENGING', 'active_positive_caring': 'ACTIVE_POS_CARING', 'active_positive_other': 'ACTIVE_POS_OTHER'}
+    dict_pappa_dim1_reduced = {'na': 'NA', 'passive': 'PASSIVE', 'active_negative': 'ACTIVE_NEG', 'active_positive': 'ACTIVE_POS'}
+    dict_pappa_dim1_binary = {'na': 'NA', 'passive': 'PAS', 'active': 'POS'}
+    dict_pappa_dim2 = {'explicit': 'EXPLICIT', 'implicit': 'IMPLICIT'}
+    dict_pappa_dim3 = {'descriptive': 'DESCRIPTIVE', 'ideal': 'IDEAL'}
 
     # Use a dictionary to select the function to execute and the labels to adopt
-    dict_task_func = {'pappa_dim1': read_data_pappa_dim1, 'pappa_dim2': read_data_pappa_dim2, 'pappa_dim3': read_data_pappa_dim3}
-    dic_task_labels = {'pappa_dim1': dict_pappa_dim1, 'pappa_dim1_reduced': dict_pappa_dim1_reduced, 'pappa_dim1_binary': dict_pappa_dim1_binary}
+    dict_task_func = {'pappa_dim1': read_data_pappa, 'pappa_dim2': read_data_pappa, 'pappa_dim3': read_data_pappa}
+    dic_task_labels = {'pappa_dim1': dict_pappa_dim1, 'pappa_dim1_reduced': dict_pappa_dim1_reduced, 'pappa_dim1_binary': dict_pappa_dim1_binary, 'pappa_dim2': dict_pappa_dim2, 'pappa_dim3': dict_pappa_dim3}
 
-    # Read input_text and gold_labels from data_file selecting the read_data_pappa_dim1 or read_data_pappa_dim2 or ead_data_pappa_dim3
+    # Read input_text and gold_labels from data_file selecting the right loading function
     input_texts, gold_labels = dict_task_func[args.task](args.data_file)
 
+
     generate_predictions_df(
-        input_texts, gold_labels,
-        args.checkpoint,
-        dic_task_labels[args.task],
-        args.instruction,
-        args.output_file,
+        input_texts=input_texts,
+        instruction=args.instruction,
+        output_prompt=args.output_prompt,
+        dict_labels=dic_task_labels[args.task],
+        gold_labels=gold_labels,
+        checkpoint=args.checkpoint,
+        cache_dir=args.cache_dir,
         len_max_model=args.len_max_model,
+        output_file=args.output_file,
         )
 
 if __name__ == "__main__":
