@@ -7,8 +7,8 @@ The text annotations produced by the LLM are then evaluated against the gold lab
 
 Examples usage:
 
-python llm_classifiers.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir ~/.cache/huggingface/hub/ --task pappa_dim1 --output_file results --len_max_model 512
-python llm_classifiers.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --task pappa_dim1 --output_file results --len_max_model 512
+python llm_classifiers.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir ~/.cache/huggingface/hub/ --task pappa_dim1 --output_dir tmp --len_max_model 512
+python llm_classifiers.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --task pappa_dim1 --output_dir tmp --len_max_model 512
 '''
 
 import argparse
@@ -216,7 +216,7 @@ def main():
                             help='Directory with HF models.')
     required_args.add_argument('--len_max_model', type=int, required=True,
                             help='Maximum sequence length of the LLM.')
-    required_args.add_argument('--output_file', type=str, required=True,
+    required_args.add_argument('--output_dir', type=str, required=True,
                             help='File to write the results.')
     args = parser.parse_args()
 
@@ -251,10 +251,10 @@ def main():
 
     # Save to output files
     current_time = datetime.datetime.now().strftime("%d%m_%H%M%S")
-    output_file_name = f'{args.output_file}/{args.task}_{args.checkpoint.split("/")[-1]}_{current_time}'
-    df.to_csv(output_file_name + '.pre.csv', sep=";", index=False)
-    df_accuracy.to_csv(output_file_name + '.acc.csv', sep=";", index=False)
-    df_kappa.to_csv(output_file_name + '.kap.csv', sep=";", index=False)
+    output_file = f'{args.output_dir}/{args.task}_{args.checkpoint.split("/")[-1]}_{current_time}'
+    df.to_csv(output_file + '.pre.csv', sep=";", index=False)
+    df_accuracy.to_csv(output_file + '.acc.csv', sep=";", index=False)
+    df_kappa.to_csv(output_file + '.kap.csv', sep=";", index=False)
 
 if __name__ == "__main__":
     main()
