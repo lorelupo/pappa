@@ -1,3 +1,16 @@
+'''
+This code exploits large language models (LLMs) as annotators.
+Given an annotation task defined by a set of input texts, a set of possible labels,
+and an instruction for the LLM, the code generates a prompt matching the input text and the instruction,
+and uses an LLM to generate a label prediction for text. 
+The text annotations produced by the LLM are then evaluated against the gold labels using accuracy and the Cohen's kappa metric.
+
+Examples usage:
+
+python llm_classifiers.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir ~/.cache/huggingface/hub/ --task pappa_dim1 --output_file results --len_max_model 512
+python llm_classifiers.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --task pappa_dim1 --output_file results --len_max_model 512
+'''
+
 import argparse
 import os
 import pandas as pd
@@ -26,9 +39,11 @@ def generate_predictions_df(
         cache_dir,
         len_max_model,
         ):
-
-    # Check if cuda is available
-    print(f'Running on {torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")} device...')
+    
+    # Set device
+    # device = torch.device('cuda:1' if torch.cuda.device_count() >= 2 else 'cuda:0' if torch.cuda.is_available() else 'cpu')
+    device = 'GPU' if torch.cuda.is_available() else 'CPU'
+    print(f'Running on {device} device...')
 
     # Create an empty DataFrame with the desired column names
     df = pd.DataFrame(columns=['id', 'text', 'prompt', 'gold_label', 'prediction'])
@@ -75,7 +90,7 @@ def generate_predictions_df(
         
         # Encode the prompt using the tokenizer and generate a prediction using the model
         with torch.no_grad():
-            inputs = tokenizer(prompt, return_tensors="pt")
+            inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
             # If inputs is longer then len_max_model, remove tokens from the encoded instruction
             len_inputs = inputs['input_ids'].shape[1]
             if len_inputs > len_max_model:
@@ -90,7 +105,7 @@ def generate_predictions_df(
                 # Decode inputs and print them
                 # decoded_inputs = tokenizer.decode(inputs['input_ids'][0].tolist())
                 # print(f'Decoded inputs: \n{decoded_inputs}')
-                
+            
             outputs = model.generate(**inputs, max_new_tokens=max_len) # or max_length=inputs['input_ids'].shape[1]+max_len
             outputs_ = tokenizer.decode(outputs[0].tolist(), skip_special_tokens=True)
             predictions.append(outputs_)
@@ -166,10 +181,18 @@ def evaluate_predictions(df_predictions):
         df_accuracy.mean_human[name] = (df_accuracy[human_names].loc[name].sum() - 1.0) / (len(human_names) - 1.0)
 
     print('ACCURACY:')
-    print(df_accuracy, '\n')
-    print('KAPPA:')
-    print(df_kappa)
+    print(df_accuracy.round(4)*100)
     print()
+    print(f"Humans' mean accuracy: {100*df_accuracy.mean_human[:-1].mean():.2f}")
+    print(f"Model's mean accuracy: {100*df_accuracy.model[:-1].mean():.2f}")
+    print(f'Diff in mean accuracy: {100*(df_accuracy.mean_human[:-1].mean() - df_accuracy.model[:-1].mean()):.2f}')
+    print()
+    print('KAPPA:')
+    print(df_kappa.round(4)*100)
+    print()
+    print(f"Humans' mean kappa: {100*df_kappa.mean_human[:-1].mean():.2f}")
+    print(f"Model's mean kappa: {100*df_kappa.model[:-1].mean():.2f}")
+    print(f'Diff in mean kappa: {100*(df_kappa.mean_human[:-1].mean() - df_kappa.model[:-1].mean()):.2f}')
 
     return df_accuracy, df_kappa
 
@@ -222,7 +245,7 @@ def main():
         cache_dir=args.cache_dir,
         len_max_model=args.len_max_model,
         )
-    
+
     # Evaluate model's labels
     df_accuracy, df_kappa = evaluate_predictions(df)
 
