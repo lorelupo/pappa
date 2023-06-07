@@ -1,0 +1,5 @@
+Classify the role of the father in the text according to the following labels:
+passive: Fathers who are not actively involved in hands-on care and upbringing;
+active: Fathers who are actively engaged in caregiving and parenting responsibilities, even if negatively portrayed;
+na: not applicable;
+Text:

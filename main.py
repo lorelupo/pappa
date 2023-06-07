@@ -7,17 +7,17 @@ The text annotations produced by the LLM are then evaluated against the gold lab
 
 Examples usage:
 
-python llm_classifiers.py --data_file data/m3_eval_gender.tsv --instruction instructions/t5_gender.txt --output_prompt "Genere:" --checkpoint google/flan-t5-small --cache_dir ~/.cache/huggingface/hub/ --task user_gender --output_dir tmp --len_max_model 512
-python llm_classifiers.py --data_file data/m3_eval_gender.tsv --instruction instructions/t5_gender.txt --output_prompt "Genere:" --checkpoint google/flan-t5-small --cache_dir $WORK/cache/huggingface/hub/ --task user_gender --output_dir tmp --len_max_model 512
-python llm_classifiers.py --data_file data/m3_eval_gender.tsv --instruction instructions/t5_gender_en.txt --output_prompt "Gender:" --checkpoint google/flan-t5-xxl --cache_dir $WORK/cache/huggingface/hub/ --task user_gender --output_dir tmp --len_max_model 512
-python llm_classifiers.py --data_file data/m3_eval_gender.tsv --instruction instructions/t5_gender_en_noname.txt --output_prompt "Gender:" --checkpoint google/flan-t5-xxl --cache_dir $WORK/cache/huggingface/hub/ --task user_gender_noname --output_dir tmp --len_max_model 512
+python main.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir ~/.cache/huggingface/hub/ --task pappa_dim1 --output_dir tmp --len_max_model 512
+python main.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --task pappa_dim1 --output_dir tmp --len_max_model 512
+python main.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1_explained.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-xxl --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --task pappa_dim1 --output_dir tmp --len_max_model 512
+task=dim1_binary
+python main.py --task pappa_$task --data_file data/human_annotation/$task.csv --instruction instructions/t5_pappa_$task.txt --checkpoint google/flan-ul2 --output_prompt "Role of the father:" --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --output_dir tmp --len_max_model 512
 '''
 
 import argparse
-import datetime
-import os
 from lm_classifier import LMClassifier
 from task_manager import TaskManager
+from utils import CopyStdoutToFile, incremental_path
 
 def main():
     
@@ -43,35 +43,37 @@ def main():
                             help='File to write the results.')
     args = parser.parse_args()
 
-    # Define task and load data
-    tm = TaskManager(args.task)
-    input_texts, gold_labels = tm.read_data(args.data_file)
+    # Duplicate the output to stdout and a log file
+    output_base_dir = f'{args.output_dir}/{args.task}_{args.checkpoint.split("/")[-1]}'
+    output_dir = incremental_path(output_base_dir)
+    with CopyStdoutToFile(output_dir + '/log.txt'):
 
-    # Define LLM classifier
-    classifier = LMClassifier(input_texts, tm.labels, gold_labels)
+        # Define task and load data
+        tm = TaskManager(args.task)
+        input_texts, gold_labels = tm.read_data(args.data_file)
 
-    # Generate predictions
-    classifier.generate_predictions(
-        instruction=args.instruction,
-        output_prompt=args.output_prompt,
-        checkpoint=args.checkpoint,
-        cache_dir=args.cache_dir,
-        len_max_model=args.len_max_model
-        )
+        # Define LLM classifier
+        classifier = LMClassifier(input_texts, tm.labels, gold_labels)
 
-    # Evaluate predictions
-    classifier.evaluate_predictions()  
+        # Generate predictions
+        classifier.generate_predictions(
+            instruction=args.instruction,
+            output_prompt=args.output_prompt,
+            checkpoint=args.checkpoint,
+            cache_dir=args.cache_dir,
+            len_max_model=args.len_max_model
+            )
 
-    # Define output paths
-    current_time = datetime.datetime.now().strftime("%d%m%y_%Hh%Mm%S")
-    output_dir = f'{args.output_dir}/{args.task}_{args.checkpoint.split("/")[-1]}_{current_time}'
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+        # Evaluate predictions
+        classifier.evaluate_predictions()  
 
-    # Save results
-    classifier.df.to_csv(output_dir + '/pre.tsv', sep="\t", index=False)
-    classifier.df_accuracy.to_csv(output_dir + '/acc.tsv', sep="\t", index=False)
-    classifier.df_kappa.to_csv(output_dir + '/kap.tsv', sep="\t", index=False)
+        # Save results
+        classifier.df.to_csv(output_dir + '/pre.tsv', sep="\t", index=True)
+        classifier.df_accuracy.to_csv(output_dir + '/acc.tsv', sep="\t", index=True)
+        classifier.df_kappa.to_csv(output_dir + '/kap.tsv', sep="\t", index=True)
+        classifier.df_f1.to_csv(output_dir + '/f1.tsv', sep="\t", index=True)
+
+        print('ciao')
 
 if __name__ == "__main__":
     main()

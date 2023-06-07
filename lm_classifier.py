@@ -4,7 +4,7 @@ import collections
 import torch
 import datetime
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-from sklearn.metrics import cohen_kappa_score, accuracy_score
+from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score
 
 class LMClassifier:
     """
@@ -161,15 +161,18 @@ class LMClassifier:
         # define tables where to store results
         self.df_kappa = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
         self.df_accuracy = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+        self.df_f1 = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
 
 
         for i, col in enumerate(gold_labels.columns):
             # compare agreement with gold labels
             kappa = cohen_kappa_score(self.df['prediction'].astype(str), gold_labels[col].astype(str))
             accuracy = accuracy_score(self.df['prediction'].astype(str), gold_labels[col].astype(str))
+            f1 = f1_score(self.df['prediction'].astype(str), gold_labels[col].astype(str), average='macro')
             # store results
             self.df_kappa.loc['model', gold_names[i]] = self.df_kappa.loc[gold_names[i], 'model'] = kappa
             self.df_accuracy.loc['model', gold_names[i]] = self.df_accuracy.loc[gold_names[i], 'model'] = accuracy
+            self.df_f1.loc['model', gold_names[i]] = self.df_f1.loc[gold_names[i], 'model'] = f1
 
             if len(gold_labels.columns) > 1:
                 for j, col2 in enumerate(gold_labels.columns):
@@ -177,9 +180,11 @@ class LMClassifier:
                         # compare agreement of gold labels with each other
                         kappa = cohen_kappa_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
                         accuracy = accuracy_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
+                        f1 = f1_score(gold_labels[col].astype(str), gold_labels[col2].astype(str), average='macro')
                         # store results
                         self.df_kappa.loc[gold_names[i], gold_names[j]] = self.df_kappa.loc[gold_names[j], gold_names[i]] = kappa
                         self.df_accuracy.loc[gold_names[i], gold_names[j]] = self.df_accuracy.loc[gold_names[j], gold_names[i]] = accuracy
+                        self.df_f1.loc[gold_names[i], gold_names[j]] = self.df_f1.loc[gold_names[j], gold_names[i]] = f1
 
         # in case of multiple gold annotations, there could be a column "gold_agg",
         # referring to the aggregated annotation (computed with tools like MACE)
@@ -189,12 +194,22 @@ class LMClassifier:
         if len(gold_labels.columns) > 1:
             self.df_kappa['mean_non_agg'] = self.df_kappa[non_agg_names].mean(axis=1)
             self.df_accuracy['mean_non_agg'] = self.df_accuracy[non_agg_names].mean(axis=1) 
+            self.df_f1['mean_non_agg'] = self.df_f1[non_agg_names].mean(axis=1)
             for name in non_agg_names:
                 # correct for humans fully agreeing with themselves
                 self.df_kappa.mean_non_agg[name] = (self.df_kappa[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
                 self.df_accuracy.mean_non_agg[name] = (self.df_accuracy[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
+                self.df_f1.mean_non_agg[name] = (self.df_f1[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
         
         # print info
+        print('KAPPA:')
+        print(self.df_kappa.round(4)*100)
+        print()
+        if len(gold_labels.columns) > 1:
+            print(f"Annotators' mean kappa: {100*self.df_kappa.mean_non_agg[:-1].mean():.2f}")
+            print(f"Model's mean kappa: {100*self.df_kappa.model[:-1].mean():.2f}")
+            print(f'Diff in mean kappa: {100*(self.df_kappa.mean_non_agg[:-1].mean() - self.df_kappa.model[:-1].mean()):.2f}')
+        print()
         print('ACCURACY:')
         print(self.df_accuracy.round(4)*100)
         print()
@@ -203,12 +218,12 @@ class LMClassifier:
             print(f"Model's mean accuracy: {100*self.df_accuracy.model[:-1].mean():.2f}")
             print(f'Diff in mean accuracy: {100*(self.df_accuracy.mean_non_agg[:-1].mean() - self.df_accuracy.model[:-1].mean()):.2f}')
         print()
-        print('KAPPA:')
-        print(self.df_kappa.round(4)*100)
+        print('F1:')
+        print(self.df_f1.round(4)*100)
         print()
         if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean kappa: {100*self.df_kappa.mean_non_agg[:-1].mean():.2f}")
-            print(f"Model's mean kappa: {100*self.df_kappa.model[:-1].mean():.2f}")
-            print(f'Diff in mean kappa: {100*(self.df_kappa.mean_non_agg[:-1].mean() - self.df_kappa.model[:-1].mean()):.2f}')
+            print(f"Annotators' mean F1: {100*self.df_f1.mean_non_agg[:-1].mean():.2f}")
+            print(f"Model's mean F1: {100*self.df_f1.model[:-1].mean():.2f}")
+            print(f'Diff in mean F1: {100*(self.df_f1.mean_non_agg[:-1].mean() - self.df_f1.model[:-1].mean()):.2f}')
 
         return self.df_accuracy, self.df_kappa
