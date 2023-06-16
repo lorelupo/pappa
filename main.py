@@ -14,10 +14,10 @@ task=dim1_binary
 python main.py --task pappa_$task --data_file data/human_annotation/$task.csv --instruction instructions/t5_pappa_$task.txt --checkpoint google/flan-ul2 --output_prompt "Role of the father:" --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --output_dir tmp --len_max_model 512
 '''
 
+from utils import CopyStdoutToFile, incremental_path
 import argparse
 from lm_classifier import LMClassifier
 from task_manager import TaskManager
-from utils import CopyStdoutToFile, incremental_path
 
 def main():
     
@@ -72,8 +72,6 @@ def main():
         classifier.df_accuracy.to_csv(output_dir + '/acc.tsv', sep="\t", index=True)
         classifier.df_kappa.to_csv(output_dir + '/kap.tsv', sep="\t", index=True)
         classifier.df_f1.to_csv(output_dir + '/f1.tsv', sep="\t", index=True)
-
-        print('ciao')
 
 if __name__ == "__main__":
     main()

@@ -226,4 +226,4 @@ class LMClassifier:
             print(f"Model's mean F1: {100*self.df_f1.model[:-1].mean():.2f}")
             print(f'Diff in mean F1: {100*(self.df_f1.mean_non_agg[:-1].mean() - self.df_f1.model[:-1].mean()):.2f}')
 
-        return self.df_accuracy, self.df_kappa
+        return self.df_kappa, self.df_accuracy, self.df_f1
