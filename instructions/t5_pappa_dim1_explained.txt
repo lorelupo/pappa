@@ -1,8 +1,0 @@
-Classify the role of the father in the text according to the following labels:
-passive: Fathers who are not actively involved in hands-on care and upbringing;
-active_negative: Fathers exhibiting harmful behaviors like aggression, violence, or neglect;
-active_positive_caring: Fathers providing care, warmth, empathy, and support;
-active_positive_challenging: Fathers encouraging risk-taking, growth, and educational activities;
-active_positive_other: Fathers displaying competence, responsibility, trustworthiness, without specifying a specific role;
-na: not applicable;
-Text:

@@ -1,0 +1,56 @@
+
+Label the following sentence with the role of the father in the life of mother and child (PASSIVE, ACTIVE_POS_CARING, ACTIVE_POS_CHALLENGING, ACTIVE_POS_OTHER, ACTIVE_NEG, or NA). These roles can also be IMPLICIT or EXPLICIT in the text. Further, they can describe as state (DESCRIPTIVE), or an aim (IDEAL).
+
+i båda fallen är modern genetisk mor till barnet .
+NA
+
+i de fall socialnämnden inte tar sitt ansvar eller inte lyckas , måste det ändå finnas rätt för nära anhöriga , som mor- och farföräldrar , att hos tingsrätten föra talan om umgänge .
+NA
+
+det finns en överrepresentation bland fäder med låg utbildning , låg inkomst och pappor med utländsk bakgrund .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+visserligen är det obalans i uttaget av föräldraförsäkringen , men samtidigt är det viktigt att slå fast att fler pappor i dag tar ut föräldraledighet än före införandet av mamma- och pappamånaden .
+ACTIVE_POS_OTHER, EXPLICIT, DESCRIPTIVE
+
+om barnets föräldrar varken är gifta eller registrerade samman- boende vid barnets födelse är mamman ensam vårdnadshavare .
+PASSIVE, IMPLICIT, DESCRIPTIVE
+
+bland dem fanns män , kvinnor och barn , unga och gamla , fäder och mödrar , söner och döttrar , makar och syskon .
+NA
+
+lagutskottet har tidigare anfört att man anser att den nuvarande ordningen ger betryggande garantier för att det verkligen är den biologiske fadern och inte någon annan som fastställs som far till ett barn ( 0000/00 : lu0 ) .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+i isf : s rapport dubbeldagar – pappors väg in i föräldrapenningen dras slutsatsen att pappors uttag under barnets första levnadsår har ökat och att pappor som tidigare valt att ej ta ut föräldrapenning nu börjat ta ut dagar .
+ACTIVE_POS_OTHER, EXPLICIT, DESCRIPTIVE
+
+som förutsättning för alt barnavårdsnämnden skall vara skyldig att utreda om annan än den äkta mannen kan vara fader uppställer förslaget - utom att bamet skall ha viss anknytning lill sverige - dels att utredningen skall ha begärts av vårdnadshavare för barnet , d , v , s , normalt modern , eller av den äkta mannen , dels att det skall finnas lämpligt .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+genom projektet `` läs för mig pappa '' , knutet till arbetsplatsbibliotek , uppmuntras fäder att både läsa själva och att läsa för sina barn .
+ACTIVE_POS_CHALLENGING, EXPLICIT, IDEAL
+
+någon skyldighet att godkänna en utländsk dom om moderskap för barnets sociala eller genetiska mor , eller en utländsk dom om faderskap för en genetisk fars manliga partner , kan däremot inte utläsas av domstolens hittill- svarande praxis .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+här uppmanas pappor också att ta ett ansvar som läsande fäder .
+ACTIVE_POS_CHALLENGING, EXPLICIT, IDEAL
+
+av barnens svar kan man utläsa att mammor generellt har mer tid för sina barn oavsett i vilken utsträckning de bor med mamma , medan för barnen kan det ge mer tid med pappa när föräldrarna separerar än när de bor ihop under förutsättning att de minst bor halva tiden med pappan .
+ACTIVE_POS_OTHER, IMPLICIT, IDEAL
+
+det är fullt möjligt att kommunicera kring varför för- äldraskapet så lätt upplevs som något som angår mamman mer än pappan , varför pappor kan känna sig som tillräckligt goda fäder trots ett mycket lågt uttag av föräldraledighet , varför mammor ofta tror att de är bättre på att läsa av barnet än vad pappor är , varför pappor uppfattas som hjältar när de gör samma sak som mammor gör av bara farten och tusen andra frågor som har att göra med för- äldraskapet som bekönad position .
+ACTIVE_POS_CARING, IMPLICIT, IDEAL
+
+då utmålas oftast pappan som hotfull , våldsam och som en dålig förälder .
+ACTIVE_NEG, EXPLICIT, DESCRIPTIVE
+
+det vanliga är sedan att våldtäktsmannen -- om det inte var fadern eller en nära släkting som förövat dådet -- betalar flickans föräldrar för att de inte skall anmäla fallet till polisen .
+ACTIVE_NEG, IMPLICIT, DESCRIPTIVE
+
+för att underlätta för framför allt fäder att öka sitt uttag av föräldrapen­ning föreslås att ersättningen utges med sjukpenningens belopp oberoende av den andre förälderns sjukpenning .
+ACTIVE_POS_OTHER, EXPLICIT, IDEAL
+
+ha föräldrar gemensamt barn i sin värd , utgår föräldrapenning över garanlinivån lill fadern endast under förutsättning att även modern är eller enligt vad förut sagts bort vara försäkrad för sjukpenning som överstiger garantinivån .
+PASSIVE, EXPLICIT, DESCRIPTIVE

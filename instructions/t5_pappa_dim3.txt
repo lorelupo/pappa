@@ -1,2 +1,0 @@
-Classify the role of the father in the life of mother and child as "passive", "active_negative", "active_positive_caring", "active_positive_challenging", "active_positive_other", or "na".
-Text:

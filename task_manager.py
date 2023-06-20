@@ -12,7 +12,7 @@ class TaskManager:
         self.task_dict = {
             'pappa_dim1': {
                 'labels': {
-                    'na': 'NA',
+                    'not_applicable': 'NA',
                     'passive': 'PASSIVE',
                     'active_negative': 'ACTIVE_NEG',
                     'active_positive_challenging': 'ACTIVE_POS_CHALLENGING',
@@ -22,7 +22,7 @@ class TaskManager:
                 'read_function': self.read_data_pappa,
             },
             'pappa_dim1_reduced': {
-                'labels': {'na': 'NA',
+                'labels': {'not_applicable': 'NA',
                            'passive': 'PASSIVE',
                            'active_negative': 'ACTIVE_NEG',
                            'active_positive': 'ACTIVE_POS'},
@@ -30,7 +30,7 @@ class TaskManager:
             },
             'pappa_dim1_binary': {
                 'labels': {
-                    'na': 'NA',
+                    'not_applicable': 'NA',
                     'passive': 'PAS',
                     'active': 'POS'
                     },

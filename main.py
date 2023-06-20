@@ -5,18 +5,42 @@ and an instruction for the LLM, the code generates a prompt matching the input t
 and uses an LLM to generate a label prediction for text. 
 The text annotations produced by the LLM are then evaluated against the gold labels using accuracy and the Cohen's kappa metric.
 
-Examples usage:
+Examples usage on local machine:
 
-python main.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir ~/.cache/huggingface/hub/ --task pappa_dim1 --output_dir tmp --len_max_model 512
-python main.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-small --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --task pappa_dim1 --output_dir tmp --len_max_model 512
-python main.py --data_file data/human_annotation/dim1.csv --instruction instructions/t5_pappa_dim1_explained.txt --output_prompt "Role of the father:" --checkpoint google/flan-t5-xxl --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --task pappa_dim1 --output_dir tmp --len_max_model 512
-task=dim1_binary
-python main.py --task pappa_$task --data_file data/human_annotation/$task.csv --instruction instructions/t5_pappa_$task.txt --checkpoint google/flan-ul2 --output_prompt "Role of the father:" --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ --output_dir tmp --len_max_model 512
+python main.py \
+    --data_file data/human_annotation/dim1.csv \
+    --instruction instructions/pappa_dim1_binary.txt \
+    --output_prompt "Role of the father:" \
+    --model_name google/flan-t5-small \
+    --cache_dir ~/.cache/huggingface/hub/ \
+    --task pappa_dim1 \
+    --output_dir tmp \
+    --len_max_model 512
+
+python main.py \
+--data_file data/human_annotation/dim1.csv \
+--instruction instructions/pappa_dim1_short_fewshot.txt \
+--output_prompt "\\nRole:" \
+--model_name gpt \
+--task pappa_dim1 \
+--output_dir tmp
+
+Examples usage on server:
+
+python main.py \
+    --task pappa_dim1 \
+    --data_file data/human_annotation/dim1.csv \
+    --instruction instructions/pappa_dim1_binary.txt \
+    --model_name google/flan-ul2 \
+    --output_prompt "Role of the father:" \
+    --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ \
+    --output_dir tmp \
+    --len_max_model 512
 '''
 
 from utils import CopyStdoutToFile, incremental_path
 import argparse
-from lm_classifier import LMClassifier
+from lm_classifiers import HFClassifier, GPTClassifier
 from task_manager import TaskManager
 
 def main():
@@ -26,25 +50,31 @@ def main():
     # Required parameters
     required_args = parser.add_argument_group('required arguments')
     required_args.add_argument('--data_file', type=str, required=True,
-                            help='The input data file. Should contain the .tsv file for the Hate Speech dataset.')
+                            help='The input data file. \
+                                Should contain the .tsv file \
+                                    for the Hate Speech dataset.')
     required_args.add_argument('--task', type=str, required=True,
                             help='The task selected.')
     required_args.add_argument('--instruction', type=str, required=True,
                             help='The instruction for the prompt.')
     required_args.add_argument('--output_prompt', type=str, required=True,
                             help='The instruction for the prompt.')
-    required_args.add_argument('--checkpoint', type=str, required=True,
-                            help='The model checkpoint.')
-    required_args.add_argument('--cache_dir', type=str, required=True,
-                            help='Directory with HF models.')
-    required_args.add_argument('--len_max_model', type=int, required=True,
-                            help='Maximum sequence length of the LLM.')
+    required_args.add_argument('--model_name', type=str, required=True,
+                            help='The name of the HuggingFace model, \
+                            or "GPT" to use the API of OpenAI.')
     required_args.add_argument('--output_dir', type=str, required=True,
                             help='File to write the results.')
     args = parser.parse_args()
+    # Optional parameters in case of HuggingFace models
+    if args.model_name != 'gpt':
+        required_args.add_argument('--cache_dir', type=str, required=True,
+                                help='Directory with HF models.')
+        required_args.add_argument('--len_max_model', type=int, required=True,
+                                help='Maximum sequence length of the LLM.')
+    args = parser.parse_args()
 
     # Duplicate the output to stdout and a log file
-    output_base_dir = f'{args.output_dir}/{args.task}_{args.checkpoint.split("/")[-1]}'
+    output_base_dir = f'{args.output_dir}/{args.instruction.split("/")[-1].split(".")[0]}_{args.model_name.split("/")[-1]}'
     output_dir = incremental_path(output_base_dir)
     with CopyStdoutToFile(output_dir + '/log.txt'):
 
@@ -52,17 +82,28 @@ def main():
         tm = TaskManager(args.task)
         input_texts, gold_labels = tm.read_data(args.data_file)
 
-        # Define LLM classifier
-        classifier = LMClassifier(input_texts, tm.labels, gold_labels)
+        # Define classifier
+        if args.model_name == 'gpt':
+            classifier = GPTClassifier(input_texts, tm.labels, gold_labels)
 
-        # Generate predictions
-        classifier.generate_predictions(
-            instruction=args.instruction,
-            output_prompt=args.output_prompt,
-            checkpoint=args.checkpoint,
-            cache_dir=args.cache_dir,
-            len_max_model=args.len_max_model
-            )
+            # Generate predictions
+            classifier.generate_predictions(
+                instruction=args.instruction,
+                output_prompt=args.output_prompt,
+                )
+
+        else:
+            classifier = HFClassifier(input_texts, tm.labels, gold_labels)
+        
+            # Generate predictions
+            classifier.generate_predictions(
+                instruction=args.instruction,
+                output_prompt=args.output_prompt,
+                model_name=args.model_name,
+                cache_dir=args.cache_dir,
+                len_max_model=args.len_max_model
+                )
+
 
         # Evaluate predictions
         classifier.evaluate_predictions()  

@@ -1,3 +1,5 @@
+import openai
+import backoff
 import os
 import pandas as pd
 import collections 
@@ -6,9 +8,206 @@ import datetime
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score
 
-class LMClassifier:
+class GPTClassifier:
     """
-    Classifier for generating predictions using a language model and evaluating the predictions.
+    Classifier for generating predictions using GPT throught the OpenAI API.
+
+    Attributes:
+        df (pd.DataFrame): DataFrame containing the generated predictions and gold labels.
+        df_accuracy (pd.DataFrame): DataFrame containing the accuracy of the predictions.
+        df_kappa (pd.DataFrame): DataFrame containing the Cohen's kappa of the predictions.
+    """
+
+    def __init__(self, input_texts, dict_labels, gold_labels):
+        """
+        Args:
+            input_texts (List[str]): List of input texts to generate predictions for.
+            dict_labels (Dict[str, int]): Dictionary mapping label names to label IDs.
+            gold_labels (Union[pd.DataFrame, List[str]]): Gold labels corresponding to the input texts.
+        """
+
+        openai.api_key = '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'    
+        self.input_texts = input_texts
+        self.dict_labels = dict_labels
+        self.gold_labels = gold_labels
+
+    def generate_predictions(self, instruction, output_prompt):
+        """
+        Generate predictions for the input texts using the GPT language model.
+
+        Args:
+            instruction (str): The instruction text for the LM, or path to a file containing the instruction.
+            output_prompt (str): The output prompt to use for generating predictions.
+
+        Returns:
+            pd.DataFrame: DataFrame containing the generated predictions and input prompts.
+        """
+    
+        @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError))
+        def completions_with_backoff(**kwargs):
+            return openai.Completion.create(**kwargs)   
+
+        # Define the instruction and output strings for prompt formulation
+        # If instruction is a path to a file, read the file, else use the instruction as is
+        instruction = open(instruction, 'r').read() if os.path.isfile(instruction) else instruction
+        output = output_prompt.replace('\\n', '\n')
+
+        time = []
+        prompts = []
+        predictions = []
+        # Generate predictions and prompts for each input text
+        for i, input_text in enumerate(self.input_texts):
+            # Record the start time
+            start_time = datetime.datetime.now()
+
+            # Formulate the prompt
+            prompt = f'{instruction} {input_text} {output}'
+            print(prompt) if i == 0 else None
+
+            # Print progress every 100 sentences
+            if (i+1) % 100 == 0:
+                print(f"Processed {i+1} sentences")
+
+            # Add the prompt to the list of prompts
+            prompts.append(prompt)
+
+            try:
+                # Generate predictions using the OpenAI API
+                gpt_out = completions_with_backoff(
+                  model="text-davinci-003",
+                  prompt=prompt,
+                  temperature=0,
+                  max_tokens=15,
+                  top_p=1,
+                  frequency_penalty=0,
+                  presence_penalty=0
+                )
+                # Extract the predicted label from the output
+                predicted_label = gpt_out['choices'][0]['text'].strip()
+            except openai.error.InvalidRequestError:
+                predicted_label = 'not_applicable'
+
+            # Add the predicted label to the list of predictionss
+            predictions.append(predicted_label)
+
+            # Record the end time
+            time.append(start_time)
+
+        # Count the number of predictions of each type and print the result
+        print(collections.Counter(predictions))
+
+        # Lowercase the predictions
+        predictions =  list(map(str.lower,predictions))
+
+        # TODO: Map the predictions to the labels (or empty string if label not found)
+        # for now, just use the predictions as is. If only a substring equals a label, it does not get mapped to the label.
+        predictions = [self.dict_labels.get(word) for word in predictions]
+        
+        # Count the number of predictions of each type and print the result
+        print(collections.Counter(predictions))
+
+        # Add the data to the DataFrame
+        self.df = pd.DataFrame({'time': time, 'prompt': prompts, 'prediction': predictions})
+
+        return self.df
+
+    def evaluate_predictions(self):
+        """
+        Evaluate the generated predictions against the gold labels and compute evaluation metrics.
+
+        Returns:
+            Tuple[pd.DataFrame, pd.DataFrame]: DataFrames containing the accuracy and kappa values.
+        """
+
+        # Add the gold labels to df
+        if isinstance(self.gold_labels, pd.DataFrame):
+            for col in self.gold_labels.columns:
+                self.df['gold_' + col] = self.gold_labels[col]    
+        elif isinstance(self.gold_labels, list):
+            self.df['gold'] = self.gold_labels
+        else:
+            raise ValueError('The gold labels must be either a list or a DataFrame.')
+        
+        # define gold_labels method variable
+        gold_labels = self.df.filter(regex='^gold', axis=1)
+
+        # retrieve the name of each gold annotation
+        gold_names = [col.split('gold_')[-1] for col in gold_labels.columns]
+
+        # define tables where to store results
+        self.df_kappa = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+        self.df_accuracy = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+        self.df_f1 = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+
+
+        for i, col in enumerate(gold_labels.columns):
+            # compare agreement with gold labels
+            kappa = cohen_kappa_score(self.df['prediction'].astype(str), gold_labels[col].astype(str))
+            accuracy = accuracy_score(self.df['prediction'].astype(str), gold_labels[col].astype(str))
+            f1 = f1_score(self.df['prediction'].astype(str), gold_labels[col].astype(str), average='macro')
+            # store results
+            self.df_kappa.loc['model', gold_names[i]] = self.df_kappa.loc[gold_names[i], 'model'] = kappa
+            self.df_accuracy.loc['model', gold_names[i]] = self.df_accuracy.loc[gold_names[i], 'model'] = accuracy
+            self.df_f1.loc['model', gold_names[i]] = self.df_f1.loc[gold_names[i], 'model'] = f1
+
+            if len(gold_labels.columns) > 1:
+                for j, col2 in enumerate(gold_labels.columns):
+                    if i < j:
+                        # compare agreement of gold labels with each other
+                        kappa = cohen_kappa_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
+                        accuracy = accuracy_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
+                        f1 = f1_score(gold_labels[col].astype(str), gold_labels[col2].astype(str), average='macro')
+                        # store results
+                        self.df_kappa.loc[gold_names[i], gold_names[j]] = self.df_kappa.loc[gold_names[j], gold_names[i]] = kappa
+                        self.df_accuracy.loc[gold_names[i], gold_names[j]] = self.df_accuracy.loc[gold_names[j], gold_names[i]] = accuracy
+                        self.df_f1.loc[gold_names[i], gold_names[j]] = self.df_f1.loc[gold_names[j], gold_names[i]] = f1
+
+        # in case of multiple gold annotations, there could be a column "gold_agg",
+        # referring to the aggregated annotation (computed with tools like MACE)
+        non_agg_names = [name for name in gold_names if 'agg' not in name]
+
+        # compute average agreement between gold annotations (except the aggregated one)
+        if len(gold_labels.columns) > 1:
+            self.df_kappa['mean_non_agg'] = self.df_kappa[non_agg_names].mean(axis=1)
+            self.df_accuracy['mean_non_agg'] = self.df_accuracy[non_agg_names].mean(axis=1) 
+            self.df_f1['mean_non_agg'] = self.df_f1[non_agg_names].mean(axis=1)
+            for name in non_agg_names:
+                # correct for humans fully agreeing with themselves
+                self.df_kappa.mean_non_agg[name] = (self.df_kappa[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
+                self.df_accuracy.mean_non_agg[name] = (self.df_accuracy[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
+                self.df_f1.mean_non_agg[name] = (self.df_f1[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
+        
+        # print info
+        print('KAPPA:')
+        print(self.df_kappa.round(4)*100)
+        print()
+        if len(gold_labels.columns) > 1:
+            print(f"Annotators' mean kappa: {100*self.df_kappa.mean_non_agg[:-1].mean():.2f}")
+            print(f"Model's mean kappa: {100*self.df_kappa.model[:-1].mean():.2f}")
+            print(f'Diff in mean kappa: {100*(self.df_kappa.mean_non_agg[:-1].mean() - self.df_kappa.model[:-1].mean()):.2f}')
+        print()
+        print('ACCURACY:')
+        print(self.df_accuracy.round(4)*100)
+        print()
+        if len(gold_labels.columns) > 1:
+            print(f"Annotators' mean accuracy: {100*self.df_accuracy.mean_non_agg[:-1].mean():.2f}") 
+            print(f"Model's mean accuracy: {100*self.df_accuracy.model[:-1].mean():.2f}")
+            print(f'Diff in mean accuracy: {100*(self.df_accuracy.mean_non_agg[:-1].mean() - self.df_accuracy.model[:-1].mean()):.2f}')
+        print()
+        print('F1:')
+        print(self.df_f1.round(4)*100)
+        print()
+        if len(gold_labels.columns) > 1:
+            print(f"Annotators' mean F1: {100*self.df_f1.mean_non_agg[:-1].mean():.2f}")
+            print(f"Model's mean F1: {100*self.df_f1.model[:-1].mean():.2f}")
+            print(f'Diff in mean F1: {100*(self.df_f1.mean_non_agg[:-1].mean() - self.df_f1.model[:-1].mean()):.2f}')
+
+        return self.df_kappa, self.df_accuracy, self.df_f1
+
+class HFClassifier:
+    """
+    Classifier for generating predictions using a language model
+    from the Huggingface Hub and evaluating the predictions.
 
     Attributes:
         df (pd.DataFrame): DataFrame containing the generated predictions and gold labels.
@@ -28,14 +227,14 @@ class LMClassifier:
         self.dict_labels = dict_labels
         self.gold_labels = gold_labels
 
-    def generate_predictions(self, instruction, output_prompt, checkpoint, cache_dir, len_max_model):
+    def generate_predictions(self, instruction, output_prompt, model_name, cache_dir, len_max_model):
         """
         Generate predictions for the input texts using a language model.
 
         Args:
             instruction (str): The instruction text for the LM, or path to a file containing the instruction.
             output_prompt (str): The output prompt to use for generating predictions.
-            checkpoint (str): Path or identifier of the pre-trained language model checkpoint.
+            model_name (str): Path or identifier of the pre-trained language model model_name.
             cache_dir (str): Directory to cache the language model files.
             len_max_model (int): Maximum length of the language model.
 
@@ -48,8 +247,8 @@ class LMClassifier:
         device = 'GPU' if torch.cuda.is_available() else 'CPU'
         print(f'Running on {device} device...')
 
-        tokenizer = AutoTokenizer.from_pretrained(checkpoint, cache_dir=cache_dir)
-        model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint, torch_dtype="auto", device_map="auto", cache_dir=cache_dir)
+        tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, torch_dtype="auto", device_map="auto", cache_dir=cache_dir)
         # Initialize empty lists for predictions and prompts
         predictions = []
         prompts = []
@@ -124,7 +323,8 @@ class LMClassifier:
         # Lowercase the predictions
         predictions =  list(map(str.lower,predictions))
 
-        # Map the predictions to the labels (or empty string if label not found)
+        # TODO: Map the predictions to the labels (or empty string if label not found)
+        # for now, just use the predictions as is. If only a substring equals a label, it does not get mapped to the label.
         predictions = [self.dict_labels.get(word) for word in predictions]
         
         # Count the number of predictions of each type and print the result
