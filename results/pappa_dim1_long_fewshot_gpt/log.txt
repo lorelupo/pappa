@@ -61,4 +61,45 @@ Role: active_positive_other
 Text: ha föräldrar gemensamt barn i sin värd , utgår föräldrapenning över garanlinivån lill fadern endast under förutsättning att även modern är eller enligt vad förut sagts bort vara försäkrad för sjukpenning som överstiger garantinivån .
 Role: passive
 
-Text: 
+Text:  man kan samtidigt disku- tera om det är lämpligt att surrogatmodern och den tilltänkta fadern gemensamt blir rättsliga föräldrar till ett barn , och att det förhåll- andet kan bli bestående om surrogatmodern väljer att inte avsäga sig föräldraskapet . 
+Role:
+Processed 100 sentences
+Processed 200 sentences
+Processed 300 sentences
+Counter({'passive': 153, 'active_positive_other': 93, 'na': 36, 'active_negative': 33, 'active_positive_caring': 25, 'active_positive_challenging': 6, 'not_applicable': 4})
+Counter({'PASSIVE': 153, 'ACTIVE_POS_OTHER': 93, None: 36, 'ACTIVE_NEG': 33, 'ACTIVE_POS_CARING': 25, 'ACTIVE_POS_CHALLENGING': 6, 'NA': 4})
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28   34.34         49.30
+lena    48.68  100.00   53.37   75.09   40.34         51.02
+oscar   49.93   53.37  100.00   78.19   42.46         51.65
+agg     67.28   75.09   78.19  100.00   43.85         73.52
+model   34.34   40.34   42.46   43.85  100.00         39.05
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 40.25
+Diff in mean kappa: 16.13
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86   47.71         61.29
+lena    60.86  100.00   66.86   81.71   56.29         63.86
+oscar   61.71   66.86  100.00   84.00   57.71         64.29
+agg     74.86   81.71   84.00  100.00   57.43         80.19
+model   47.71   56.29   57.71   57.43  100.00         53.90
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 54.79
+Diff in mean accuracy: 12.62
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   31.20         57.22
+lena    57.28  100.00   57.93   77.13   34.13         57.60
+oscar   57.15   57.93  100.00   81.33   36.74         57.54
+agg     68.85   77.13   81.33  100.00   35.26         75.77
+model   31.20   34.13   36.74   35.26  100.00         34.02
+
+Annotators' mean F1: 62.03
+Model's mean F1: 34.33
+Diff in mean F1: 27.70
