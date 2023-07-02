@@ -1,4 +1,3 @@
-
 Label the following sentence with the role of the father in the life of mother and child (PASSIVE, ACTIVE_POS_CARING, ACTIVE_POS_CHALLENGING, ACTIVE_POS_OTHER, ACTIVE_NEG, or NA). These roles can also be IMPLICIT or EXPLICIT in the text. Further, they can describe as state (DESCRIPTIVE), or an aim (IDEAL).
 
 i båda fallen är modern genetisk mor till barnet .
@@ -54,3 +53,4 @@ ACTIVE_POS_OTHER, EXPLICIT, IDEAL
 
 ha föräldrar gemensamt barn i sin värd , utgår föräldrapenning över garanlinivån lill fadern endast under förutsättning att även modern är eller enligt vad förut sagts bort vara försäkrad för sjukpenning som överstiger garantinivån .
 PASSIVE, EXPLICIT, DESCRIPTIVE
+

@@ -1,4 +1,4 @@
-Classify the swedish text according to how it describes the role of the father in the family.
+Classify the Swedish text according to how it describes the role of the father in the family.
 Possible labels are: 
 -passive
 -active_negative
@@ -8,10 +8,10 @@ Possible labels are:
 -not_applicable
 
 Text: i båda fallen är modern genetisk mor till barnet .
-Role: na
+Role: not_applicable
 
 Text: i de fall socialnämnden inte tar sitt ansvar eller inte lyckas , måste det ändå finnas rätt för nära anhöriga , som mor- och farföräldrar , att hos tingsrätten föra talan om umgänge .
-Role: na
+Role: not_applicable
 
 Text: det finns en överrepresentation bland fäder med låg utbildning , låg inkomst och pappor med utländsk bakgrund .
 Role: passive
@@ -23,7 +23,7 @@ Text: om barnets föräldrar varken är gifta eller registrerade samman- boende 
 Role: passive
 
 Text: bland dem fanns män , kvinnor och barn , unga och gamla , fäder och mödrar , söner och döttrar , makar och syskon .
-Role: na
+Role: not_applicable
 
 Text: lagutskottet har tidigare anfört att man anser att den nuvarande ordningen ger betryggande garantier för att det verkligen är den biologiske fadern och inte någon annan som fastställs som far till ett barn ( 0000/00 : lu0 ) .
 Role: passive

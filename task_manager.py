@@ -36,6 +36,17 @@ class TaskManager:
                     },
                 'read_function': self.read_data_pappa,
             },
+            'pappa_dim1_dirk': {
+                'labels': {
+                    'NA': 'NA',
+                    'PASSIVE': 'PASSIVE',
+                    'ACTIVE_NEG': 'ACTIVE_NEG',
+                    'ACTIVE_POS_CHALLENGING': 'ACTIVE_POS_CHALLENGING',
+                    'ACTIVE_POS_CARING': 'ACTIVE_POS_CARING',
+                    'ACTIVE_POS_OTHER': 'ACTIVE_POS_OTHER'
+                    },
+                'read_function': self.read_data_pappa,
+            },
             'pappa_dim2': {
                 'labels': {
                     'explicit': 'EXPLICIT',
@@ -53,6 +64,8 @@ class TaskManager:
         }
         self.task = self.task_dict[task]
         self.labels = self.task['labels']
+        # select the first label in the dictionary as default
+        self.default_label = list(self.labels.keys())[0]
         self.read_data = self.task['read_function']
 
     @staticmethod

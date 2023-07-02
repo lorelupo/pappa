@@ -1,0 +1,124 @@
+main.py \
+--data_file data/human_annotation/dim1.csv \
+--task pappa_dim1_dirk \
+--instruction instructions/pappa_all_dirk.txt \
+--output_prompt \n\n \
+--model_name gpt-3.5-turbo \
+--max_len_model 4097 \
+--output_dir tmp \
+
+Label the following sentence with the role of the father in the life of mother and child (PASSIVE, ACTIVE_POS_CARING, ACTIVE_POS_CHALLENGING, ACTIVE_POS_OTHER, ACTIVE_NEG, or NA). These roles can also be IMPLICIT or EXPLICIT in the text. Further, they can describe as state (DESCRIPTIVE), or an aim (IDEAL).
+
+i båda fallen är modern genetisk mor till barnet .
+NA
+
+i de fall socialnämnden inte tar sitt ansvar eller inte lyckas , måste det ändå finnas rätt för nära anhöriga , som mor- och farföräldrar , att hos tingsrätten föra talan om umgänge .
+NA
+
+det finns en överrepresentation bland fäder med låg utbildning , låg inkomst och pappor med utländsk bakgrund .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+visserligen är det obalans i uttaget av föräldraförsäkringen , men samtidigt är det viktigt att slå fast att fler pappor i dag tar ut föräldraledighet än före införandet av mamma- och pappamånaden .
+ACTIVE_POS_OTHER, EXPLICIT, DESCRIPTIVE
+
+om barnets föräldrar varken är gifta eller registrerade samman- boende vid barnets födelse är mamman ensam vårdnadshavare .
+PASSIVE, IMPLICIT, DESCRIPTIVE
+
+bland dem fanns män , kvinnor och barn , unga och gamla , fäder och mödrar , söner och döttrar , makar och syskon .
+NA
+
+lagutskottet har tidigare anfört att man anser att den nuvarande ordningen ger betryggande garantier för att det verkligen är den biologiske fadern och inte någon annan som fastställs som far till ett barn ( 0000/00 : lu0 ) .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+i isf : s rapport dubbeldagar – pappors väg in i föräldrapenningen dras slutsatsen att pappors uttag under barnets första levnadsår har ökat och att pappor som tidigare valt att ej ta ut föräldrapenning nu börjat ta ut dagar .
+ACTIVE_POS_OTHER, EXPLICIT, DESCRIPTIVE
+
+som förutsättning för alt barnavårdsnämnden skall vara skyldig att utreda om annan än den äkta mannen kan vara fader uppställer förslaget - utom att bamet skall ha viss anknytning lill sverige - dels att utredningen skall ha begärts av vårdnadshavare för barnet , d , v , s , normalt modern , eller av den äkta mannen , dels att det skall finnas lämpligt .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+genom projektet `` läs för mig pappa '' , knutet till arbetsplatsbibliotek , uppmuntras fäder att både läsa själva och att läsa för sina barn .
+ACTIVE_POS_CHALLENGING, EXPLICIT, IDEAL
+
+någon skyldighet att godkänna en utländsk dom om moderskap för barnets sociala eller genetiska mor , eller en utländsk dom om faderskap för en genetisk fars manliga partner , kan däremot inte utläsas av domstolens hittill- svarande praxis .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+här uppmanas pappor också att ta ett ansvar som läsande fäder .
+ACTIVE_POS_CHALLENGING, EXPLICIT, IDEAL
+
+av barnens svar kan man utläsa att mammor generellt har mer tid för sina barn oavsett i vilken utsträckning de bor med mamma , medan för barnen kan det ge mer tid med pappa när föräldrarna separerar än när de bor ihop under förutsättning att de minst bor halva tiden med pappan .
+ACTIVE_POS_OTHER, IMPLICIT, IDEAL
+
+det är fullt möjligt att kommunicera kring varför för- äldraskapet så lätt upplevs som något som angår mamman mer än pappan , varför pappor kan känna sig som tillräckligt goda fäder trots ett mycket lågt uttag av föräldraledighet , varför mammor ofta tror att de är bättre på att läsa av barnet än vad pappor är , varför pappor uppfattas som hjältar när de gör samma sak som mammor gör av bara farten och tusen andra frågor som har att göra med för- äldraskapet som bekönad position .
+ACTIVE_POS_CARING, IMPLICIT, IDEAL
+
+då utmålas oftast pappan som hotfull , våldsam och som en dålig förälder .
+ACTIVE_NEG, EXPLICIT, DESCRIPTIVE
+
+det vanliga är sedan att våldtäktsmannen -- om det inte var fadern eller en nära släkting som förövat dådet -- betalar flickans föräldrar för att de inte skall anmäla fallet till polisen .
+ACTIVE_NEG, IMPLICIT, DESCRIPTIVE
+
+för att underlätta för framför allt fäder att öka sitt uttag av föräldrapen­ning föreslås att ersättningen utges med sjukpenningens belopp oberoende av den andre förälderns sjukpenning .
+ACTIVE_POS_OTHER, EXPLICIT, IDEAL
+
+ha föräldrar gemensamt barn i sin värd , utgår föräldrapenning över garanlinivån lill fadern endast under förutsättning att även modern är eller enligt vad förut sagts bort vara försäkrad för sjukpenning som överstiger garantinivån .
+PASSIVE, EXPLICIT, DESCRIPTIVE
+
+ man kan samtidigt disku- tera om det är lämpligt att surrogatmodern och den tilltänkta fadern gemensamt blir rättsliga föräldrar till ett barn , och att det förhåll- andet kan bli bestående om surrogatmodern väljer att inte avsäga sig föräldraskapet . 
+
+
+Prompt n.6 was too long, so we removed words from it. Approx original length: 15675, approx new length: 5383
+Processed 20 sentences
+Processed 40 sentences
+Processed 60 sentences
+Processed 80 sentences
+Processed 100 sentences
+Processed 120 sentences
+Processed 140 sentences
+Processed 160 sentences
+Processed 180 sentences
+Processed 200 sentences
+Processed 220 sentences
+Prompt n.233 was too long, so we removed words from it. Approx original length: 4762, approx new length: 4762
+Processed 240 sentences
+Processed 260 sentences
+Processed 280 sentences
+Processed 300 sentences
+Processed 320 sentences
+Processed 340 sentences
+Counter({'NA': 112, 'PASSIVE, EXPLICIT, DESCRIPTIVE': 56, 'ACTIVE_POS_OTHER, EXPLICIT, DESCRIPTIVE': 32, 'ACTIVE_POS_OTHER, IMPLICIT, DESCRIPTIVE': 25, 'ACTIVE_NEG, EXPLICIT, DESCRIPTIVE': 24, 'ACTIVE_NEG, IMPLICIT, DESCRIPTIVE': 23, 'PASSIVE, IMPLICIT, DESCRIPTIVE': 23, 'ACTIVE_POS_OTHER, EXPLICIT, IDEAL': 21, 'ACTIVE_POS_CARING, EXPLICIT, IDEAL': 12, 'ACTIVE_POS_OTHER, IMPLICIT, IDEAL': 10, 'ACTIVE_POS_CARING, IMPLICIT, DESCRIPTIVE': 6, 'ACTIVE_POS_CARING, EXPLICIT, DESCRIPTIVE': 2, 'ACTIVE_POS_CARING, IMPLICIT, IDEAL': 2, 'PASSIVE, IMPLICIT, IDEAL': 1, 'PASSIVE, EXPLICIT, IDEAL': 1})
+Counter({'NA': 350})
+KAPPA:
+         elin    lena   oscar     agg  model  mean_non_agg
+elin   100.00   48.68   49.93   67.28    0.0         49.30
+lena    48.68  100.00   53.37   75.09    0.0         51.02
+oscar   49.93   53.37  100.00   78.19    0.0         51.65
+agg     67.28   75.09   78.19  100.00    0.0         73.52
+model    0.00    0.00    0.00    0.00  100.0          0.00
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 0.00
+Diff in mean kappa: 56.37
+
+ACCURACY:
+         elin    lena   oscar     agg  model  mean_non_agg
+elin   100.00   60.86   61.71   74.86    0.0         61.29
+lena    60.86  100.00   66.86   81.71    0.0         63.86
+oscar   61.71   66.86  100.00   84.00    0.0         64.29
+agg     74.86   81.71   84.00  100.00    0.0         80.19
+model    0.00    0.00    0.00    0.00  100.0          0.00
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 0.00
+Diff in mean accuracy: 67.40
+
+F1:
+         elin    lena   oscar     agg  model  mean_non_agg
+elin   100.00   57.28   57.15   68.85    0.0         57.22
+lena    57.28  100.00   57.93   77.13    0.0         57.60
+oscar   57.15   57.93  100.00   81.33    0.0         57.54
+agg     68.85   77.13   81.33  100.00    0.0         75.77
+model    0.00    0.00    0.00    0.00  100.0          0.00
+
+Annotators' mean F1: 62.03
+Model's mean F1: 0.00
+Diff in mean F1: 62.03

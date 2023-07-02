@@ -8,20 +8,20 @@ The text annotations produced by the LLM are then evaluated against the gold lab
 Examples usage on local machine:
 
 python main.py \
-    --data_file data/human_annotation/dim1.csv \
+    --data_file data/human_annotation/dim1_test.csv \
     --instruction instructions/pappa_dim1_binary.txt \
     --output_prompt "Role of the father:" \
-    --model_name google/flan-t5-small \
+    --model_name "google/flan-t5-small" \
     --cache_dir ~/.cache/huggingface/hub/ \
     --task pappa_dim1 \
     --output_dir tmp \
-    --len_max_model 512
+    --max_len_model 512
 
 python main.py \
 --data_file data/human_annotation/dim1.csv \
---instruction instructions/pappa_dim1_short_fewshot.txt \
+--instruction instructions/pappa_dim1_reasoned_fewshot.txt \
 --output_prompt "\\nRole:" \
---model_name gpt \
+--model_name gpt-3.5-turbo \
 --task pappa_dim1 \
 --output_dir tmp
 
@@ -35,84 +35,114 @@ python main.py \
     --output_prompt "Role of the father:" \
     --cache_dir /g100_work/IscrC_mental/cache/huggingface/hub/ \
     --output_dir tmp \
-    --len_max_model 512
+    --max_len_model 512
 '''
 
-from utils import CopyStdoutToFile, incremental_path
+import sys
+import os
 import argparse
+from utils import CopyStdoutToFile, incremental_path
 from lm_classifiers import HFClassifier, GPTClassifier
 from task_manager import TaskManager
+import fire
 
-def main():
-    
-    parser = argparse.ArgumentParser()
-    
-    # Required parameters
-    required_args = parser.add_argument_group('required arguments')
-    required_args.add_argument('--data_file', type=str, required=True,
-                            help='The input data file. \
-                                Should contain the .tsv file \
-                                    for the Hate Speech dataset.')
-    required_args.add_argument('--task', type=str, required=True,
-                            help='The task selected.')
-    required_args.add_argument('--instruction', type=str, required=True,
-                            help='The instruction for the prompt.')
-    required_args.add_argument('--output_prompt', type=str, required=True,
-                            help='The instruction for the prompt.')
-    required_args.add_argument('--model_name', type=str, required=True,
-                            help='The name of the HuggingFace model, \
-                            or "GPT" to use the API of OpenAI.')
-    required_args.add_argument('--output_dir', type=str, required=True,
-                            help='File to write the results.')
-    args = parser.parse_args()
-    # Optional parameters in case of HuggingFace models
-    if args.model_name != 'gpt':
-        required_args.add_argument('--cache_dir', type=str, required=True,
-                                help='Directory with HF models.')
-        required_args.add_argument('--len_max_model', type=int, required=True,
-                                help='Maximum sequence length of the LLM.')
-    args = parser.parse_args()
+OPENAI_MODELS = [
+    "gpt-4",
+    "gpt-4-0613",
+    "gpt-4-32k",
+    "gpt-4-32k-0613",
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-0613",
+    "gpt-3.5-turbo-16k-0613",
+    "code-davinci-002",
+    "text-davinci-003",
+    "text-davinci-002",
+    "text-davinci-001",
+    "text-davinci",
+    "text-curie-003",
+    "text-curie-002",
+    "text-curie-001",
+    "text-curie",
+    "davinci-codex",
+    "curie-codex",
+]
 
+def main(data_file, task, instruction, output_prompt, model_name, max_len_model, output_dir, cache_dir=None, evaluation_only=False):
     # Duplicate the output to stdout and a log file
-    output_base_dir = f'{args.output_dir}/{args.instruction.split("/")[-1].split(".")[0]}_{args.model_name.split("/")[-1]}'
-    output_dir = incremental_path(output_base_dir)
-    with CopyStdoutToFile(output_dir + '/log.txt'):
+    # strip points and slashes from the model name
+    model_name_short = model_name.split("/")[-1].replace(".", "")
+    instruction_name = instruction.split("/")[-1].split(".")[0]
+    output_base_dir = f'{output_dir}/{instruction_name}_{model_name_short}'
+    output_dir = incremental_path(output_base_dir) if not evaluation_only else output_base_dir
+    with CopyStdoutToFile(os.path.join(output_dir, 'log.txt')):
+
+        # Print the command used to run the script
+        # print(sys.argv[0], "\\")
+        # for key, value in locals().items():
+        #     print(f"--{key} {value} \\")
+        # print("")
 
         # Define task and load data
-        tm = TaskManager(args.task)
-        input_texts, gold_labels = tm.read_data(args.data_file)
+        tm = TaskManager(task)
+        input_texts, gold_labels = tm.read_data(data_file)
 
-        # Define classifier
-        if args.model_name == 'gpt':
+        
+        if model_name in OPENAI_MODELS:
+            # Define classifier
             classifier = GPTClassifier(input_texts, tm.labels, gold_labels)
 
-            # Generate predictions
-            classifier.generate_predictions(
-                instruction=args.instruction,
-                output_prompt=args.output_prompt,
-                )
+            if not evaluation_only:
+                # Generate raw predictions
+                prompts, predictions = classifier.generate_predictions(
+                    instruction=instruction,
+                    output_prompt=output_prompt,
+                    model_name=model_name,
+                    max_len_model=max_len_model,
+                    default_label=tm.default_label
+                    )
+                
+                # Save raw predictions
+                with open(os.path.join(output_dir, 'raw_predictions.txt'), 'w') as f:
+                    for prediction in predictions:
+                        f.write(prediction + "\n")
+            
+            if evaluation_only:
+                # Load raw predictions
+                with open(os.path.join(output_dir, 'raw_predictions.txt'), 'r') as f:
+                    predictions = f.read().splitlines()
+                prompts = None
+                
+            classifier.generate_predictions_df(
+                predictions=predictions,
+                default_label=tm.default_label,
+                prompts=prompts,
+            )
 
         else:
+            # Define classifier
             classifier = HFClassifier(input_texts, tm.labels, gold_labels)
-        
-            # Generate predictions
-            classifier.generate_predictions(
-                instruction=args.instruction,
-                output_prompt=args.output_prompt,
-                model_name=args.model_name,
-                cache_dir=args.cache_dir,
-                len_max_model=args.len_max_model
-                )
 
+            if not evaluation_only:
+                # Generate predictions
+                classifier.generate_predictions(
+                    instruction=instruction,
+                    output_prompt=output_prompt,
+                    model_name=model_name,
+                    cache_dir=cache_dir,
+                    max_len_model=max_len_model,
+                    default_label=tm.default_label
+                    )
 
         # Evaluate predictions
         classifier.evaluate_predictions()  
 
         # Save results
-        classifier.df.to_csv(output_dir + '/pre.tsv', sep="\t", index=True)
-        classifier.df_accuracy.to_csv(output_dir + '/acc.tsv', sep="\t", index=True)
-        classifier.df_kappa.to_csv(output_dir + '/kap.tsv', sep="\t", index=True)
-        classifier.df_f1.to_csv(output_dir + '/f1.tsv', sep="\t", index=True)
+        classifier.df.to_csv(os.path.join(output_dir, 'pre.tsv'), sep="\t", index=True)
+        classifier.df_accuracy.to_csv(os.path.join(output_dir, 'acc.tsv'), sep="\t", index=True)
+        classifier.df_kappa.to_csv(os.path.join(output_dir, 'kap.tsv'), sep="\t", index=True)
+        classifier.df_f1.to_csv(os.path.join(output_dir, 'f1.tsv'), sep="\t", index=True)
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)
+

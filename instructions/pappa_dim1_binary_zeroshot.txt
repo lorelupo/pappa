@@ -1,4 +1,4 @@
-Classify the swedish text according to how it describes the role of the father in the family.
+Classify the Swedish text according to how it describes the role of the father in the family.
 Possible labels are: 
 -passive: fathers who are not actively involved in hands-on care and upbringing of the child;
 -active: fathers who are actively engaged in caregiving and parenting responsibilities, even if negatively portrayed;

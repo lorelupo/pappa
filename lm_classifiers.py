@@ -1,12 +1,44 @@
 import openai
 import backoff
 import os
+import random
 import pandas as pd
 import collections 
 import torch
 import datetime
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score
+
+import logging
+logging.getLogger('backoff').addHandler(logging.StreamHandler())
+
+AVG_TOKENS_PER_WORD_EN = 4/3 # according to: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
+AVG_TOKENS_PER_WORD_NONEN = 5 # adjust according to the language of the input text
+AVG_TOKENS_PER_WORD_AVG = (AVG_TOKENS_PER_WORD_EN + AVG_TOKENS_PER_WORD_NONEN) / 2
+
+@backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
+def completions_with_backoff(**kwargs):
+    return openai.Completion.create(**kwargs) 
+
+@backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
+def chat_completions_with_backoff(**kwargs):
+    return openai.ChatCompletion.create(**kwargs)  
+
+def retrieve_labels(predictions, dict_labels, default_label, method='first_label_match'):
+    """
+    Retrieve the labels that are contained in the predictions.
+    :param predictions: list of predictions
+    :param dict_labels: dictionary mapping label names to label IDs
+    :param method: method to retrieve the labels
+    :return: list of labels contained in the predictions
+    """
+    labels = list(dict_labels.keys())
+    if method == 'first_label_match':
+        predicted_labels = [[label for label in labels if label in prediction] for prediction in predictions]
+        predicted_labels = [label[0] if len(label) > 0 else default_label for label in predicted_labels]
+        return [dict_labels.get(label) for label in predicted_labels]
+    else:
+        raise NotImplementedError(f"Method {method} not implemented.")
 
 class GPTClassifier:
     """
@@ -31,7 +63,7 @@ class GPTClassifier:
         self.dict_labels = dict_labels
         self.gold_labels = gold_labels
 
-    def generate_predictions(self, instruction, output_prompt):
+    def generate_predictions(self, instruction, output_prompt, model_name, max_len_model, default_label):
         """
         Generate predictions for the input texts using the GPT language model.
 
@@ -42,72 +74,100 @@ class GPTClassifier:
         Returns:
             pd.DataFrame: DataFrame containing the generated predictions and input prompts.
         """
-    
-        @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError))
-        def completions_with_backoff(**kwargs):
-            return openai.Completion.create(**kwargs)   
 
         # Define the instruction and output strings for prompt formulation
         # If instruction is a path to a file, read the file, else use the instruction as is
         instruction = open(instruction, 'r').read() if os.path.isfile(instruction) else instruction
         output = output_prompt.replace('\\n', '\n')
+        
+        # if prompt is longer then max_len_model, we will remove words from the imput text
+        # differently from HF models, where we have access to the tokenizer, here we work on full words
+        len_instruction = len(instruction.split())
+        len_output = len(output.split())
+        max_len_input_text = int((max_len_model - len_instruction*AVG_TOKENS_PER_WORD_EN - len_output*AVG_TOKENS_PER_WORD_EN) / AVG_TOKENS_PER_WORD_AVG)
 
-        time = []
         prompts = []
         predictions = []
         # Generate predictions and prompts for each input text
         for i, input_text in enumerate(self.input_texts):
-            # Record the start time
-            start_time = datetime.datetime.now()
 
             # Formulate the prompt
             prompt = f'{instruction} {input_text} {output}'
             print(prompt) if i == 0 else None
+            # if prompt is longer then max_len_model, remove words from the imput text
+            len_prompt = int(len(prompt.split())*AVG_TOKENS_PER_WORD_AVG)
+            if len_prompt > max_len_model:
+                input_text = input_text.split()
+                input_text = input_text[:max_len_input_text]
+                input_text = ' '.join(input_text)
+                prompt = f'{instruction} {input_text} {output}'
+                # print detailed info about the above operation
+                print(f'Prompt n.{i} was too long, so we removed words from it. Approx original length: {len_prompt}, approx new length: {int(len(prompt.split())*AVG_TOKENS_PER_WORD_AVG)}')
 
             # Print progress every 100 sentences
-            if (i+1) % 100 == 0:
+            if (i+1) % 20 == 0:
                 print(f"Processed {i+1} sentences")
 
             # Add the prompt to the list of prompts
             prompts.append(prompt)
 
+            # if model name starts with gpt-3, use the following code
             try:
+                if model_name.startswith('gpt'):
+                    gpt_out = chat_completions_with_backoff(
+                        model=model_name,
+                        messages=[
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0,
+                        max_tokens=15,
+                        top_p=1,
+                        frequency_penalty=0,
+                        presence_penalty=0
+                    )
+                    # Extract the predicted label from the output
+                    predicted_label = gpt_out['choices'][0]['message']['content'].strip()
                 # Generate predictions using the OpenAI API
-                gpt_out = completions_with_backoff(
-                  model="text-davinci-003",
-                  prompt=prompt,
-                  temperature=0,
-                  max_tokens=15,
-                  top_p=1,
-                  frequency_penalty=0,
-                  presence_penalty=0
-                )
-                # Extract the predicted label from the output
-                predicted_label = gpt_out['choices'][0]['text'].strip()
-            except openai.error.InvalidRequestError:
-                predicted_label = 'not_applicable'
+                else:
+                    gpt_out = completions_with_backoff(
+                        model=model_name,
+                        prompt=prompt,
+                        temperature=0,
+                        max_tokens=15,
+                        top_p=1,
+                        frequency_penalty=0,
+                        presence_penalty=0
+                    )
+                    # Extract the predicted label from the output
+                    predicted_label = gpt_out['choices'][0]['text'].strip()
+            except Exception as e:
+                print(f'Error in generating prediction for prompt n.{i}: {e}')
+                # select a random label from the list of labels
+                predicted_label = default_label
+                print(f'Selected default label: {predicted_label}')
 
             # Add the predicted label to the list of predictionss
             predictions.append(predicted_label)
 
-            # Record the end time
-            time.append(start_time)
-
         # Count the number of predictions of each type and print the result
         print(collections.Counter(predictions))
 
+        return prompts, predictions
+    
+    def generate_predictions_df(self, predictions, default_label, prompts=None):
+
         # Lowercase the predictions
-        predictions =  list(map(str.lower,predictions))
+        # predictions =  list(map(str.lower,predictions))
 
         # TODO: Map the predictions to the labels (or empty string if label not found)
         # for now, just use the predictions as is. If only a substring equals a label, it does not get mapped to the label.
-        predictions = [self.dict_labels.get(word) for word in predictions]
+        predictions = retrieve_labels(predictions, self.dict_labels, default_label, method='first_label_match')
         
         # Count the number of predictions of each type and print the result
         print(collections.Counter(predictions))
 
         # Add the data to the DataFrame
-        self.df = pd.DataFrame({'time': time, 'prompt': prompts, 'prediction': predictions})
+        self.df = pd.DataFrame({'prompt': prompts, 'prediction': predictions})
 
         return self.df
 
@@ -138,7 +198,6 @@ class GPTClassifier:
         self.df_kappa = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
         self.df_accuracy = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
         self.df_f1 = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
-
 
         for i, col in enumerate(gold_labels.columns):
             # compare agreement with gold labels
@@ -227,7 +286,7 @@ class HFClassifier:
         self.dict_labels = dict_labels
         self.gold_labels = gold_labels
 
-    def generate_predictions(self, instruction, output_prompt, model_name, cache_dir, len_max_model):
+    def generate_predictions(self, instruction, output_prompt, model_name, cache_dir, max_len_model, default_label):
         """
         Generate predictions for the input texts using a language model.
 
@@ -236,7 +295,7 @@ class HFClassifier:
             output_prompt (str): The output prompt to use for generating predictions.
             model_name (str): Path or identifier of the pre-trained language model model_name.
             cache_dir (str): Directory to cache the language model files.
-            len_max_model (int): Maximum length of the language model.
+            max_len_model (int): Maximum length of the language model.
 
         Returns:
             pd.DataFrame: DataFrame containing the generated predictions and input prompts.
@@ -291,12 +350,12 @@ class HFClassifier:
             # Encode the prompt using the tokenizer and generate a prediction using the model
             with torch.no_grad():
                 inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-                # If inputs is longer then len_max_model, remove tokens from the encoded instruction
+                # If inputs is longer then max_len_model, remove tokens from the encoded instruction
                 len_inputs = inputs['input_ids'].shape[1]
-                if len_inputs > len_max_model:
-                    print(f'Input text length: {len_inputs}. Input will be truncated to {len_max_model} tokens.')
+                if len_inputs > max_len_model:
+                    print(f'Input text length: {len_inputs}. Input will be truncated to {max_len_model} tokens.')
                     # get the number of tokens to remove from the encoded instruction
-                    len_remove = len_inputs - len_max_model
+                    len_remove = len_inputs - max_len_model
                     # get the length of the output
                     len_output = tokenizer(output, return_tensors="pt")['input_ids'].shape[1] + 1 # +1 for the full stop token
                     # remove inputs tokens that come before the output in the encoded prompt
