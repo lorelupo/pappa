@@ -1,0 +1,36 @@
+Counter({'PASSIVE': 144, 'ACTIVE_POS_OTHER': 79, 'NA': 59, 'ACTIVE_NEG': 34, 'ACTIVE_POS_CARING': 29, 'ACTIVE_POS_CHALLENGING': 5})
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28   33.95         49.30
+lena    48.68  100.00   53.37   75.09   40.38         51.02
+oscar   49.93   53.37  100.00   78.19   41.97         51.65
+agg     67.28   75.09   78.19  100.00   44.78         73.52
+model   33.95   40.38   41.97   44.78  100.00         38.77
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 40.27
+Diff in mean kappa: 16.10
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86   46.29         61.29
+lena    60.86  100.00   66.86   81.71   55.14         63.86
+oscar   61.71   66.86  100.00   84.00   56.29         64.29
+agg     74.86   81.71   84.00  100.00   57.14         80.19
+model   46.29   55.14   56.29   57.14  100.00         52.57
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 53.71
+Diff in mean accuracy: 13.69
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   36.75         57.22
+lena    57.28  100.00   57.93   77.13   38.98         57.60
+oscar   57.15   57.93  100.00   81.33   42.04         57.54
+agg     68.85   77.13   81.33  100.00   41.62         75.77
+model   36.75   38.98   42.04   41.62  100.00         39.26
+
+Annotators' mean F1: 62.03
+Model's mean F1: 39.85
+Diff in mean F1: 22.19

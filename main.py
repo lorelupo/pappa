@@ -25,6 +25,16 @@ python main.py \
 --task pappa_dim1 \
 --output_dir tmp
 
+python main.py \
+--data_file data/human_annotation/dim1.csv \
+--instruction instructions/pappa_dim1_long_fewshot_majority.txt \
+--output_prompt "\\nLabel:" \
+--model_name text-davinci-003 \
+--max_len_model 512 \
+--task pappa_dim1 \
+--output_dir results \
+--evaluation_only
+
 Examples usage on server:
 
 python main.py \
