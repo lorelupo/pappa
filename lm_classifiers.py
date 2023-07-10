@@ -1,7 +1,6 @@
 import openai
 import backoff
 import os
-import random
 import pandas as pd
 import collections 
 import torch
@@ -24,44 +23,169 @@ def completions_with_backoff(**kwargs):
 def chat_completions_with_backoff(**kwargs):
     return openai.ChatCompletion.create(**kwargs)  
 
-def retrieve_labels(predictions, dict_labels, default_label, method='first_label_match'):
-    """
-    Retrieve the labels that are contained in the predictions.
-    :param predictions: list of predictions
-    :param dict_labels: dictionary mapping label names to label IDs
-    :param method: method to retrieve the labels
-    :return: list of labels contained in the predictions
-    """
-    labels = list(dict_labels.keys())
-    if method == 'first_label_match':
-        predicted_labels = [[label for label in labels if label in prediction] for prediction in predictions]
-        predicted_labels = [label[0] if len(label) > 0 else default_label for label in predicted_labels]
-        return [dict_labels.get(label) for label in predicted_labels]
-    else:
-        raise NotImplementedError(f"Method {method} not implemented.")
+class LMClassifier:
+    def __init__(self, input_texts, labels_dict, label_dims):
 
-class GPTClassifier:
-    """
-    Classifier for generating predictions using GPT throught the OpenAI API.
+        self.input_texts = input_texts
+        self.labels_dict = labels_dict
 
-    Attributes:
-        df (pd.DataFrame): DataFrame containing the generated predictions and gold labels.
-        df_accuracy (pd.DataFrame): DataFrame containing the accuracy of the predictions.
-        df_kappa (pd.DataFrame): DataFrame containing the Cohen's kappa of the predictions.
-    """
+        # check the dimensionality of the labels:
+        # dimensionality greater than 1 means dealing with
+        # multiple classification tasks at a time
+        self.label_dims = label_dims
+        assert self.label_dims > 0, "Labels dimensions must be greater than 0."
 
-    def __init__(self, input_texts, dict_labels, gold_labels):
+    def generate_predictions(self):
+        raise NotImplementedError
+    
+    def retrieve_predicted_labels(self, predictions, default_label, prompts, only_dim=None):
+
+        # convert the predictions to lowercase
+        predictions =  list(map(str.lower,predictions))
+
+        # retrieve the labels that are contained in the predictions
+        predicted_labels = []
+        if self.label_dims == 1:
+            # retrieve a single label for each prediction since a single classification task is performed at a time
+            print("Retrieving predictions...")
+            for prediction in predictions:
+                labels_in_prediction = [self.labels_dict.get(label) for label in self.labels_dict.keys() if label in prediction]
+                predicted_labels.append(labels_in_prediction[0]) if len(labels_in_prediction) > 0 else predicted_labels.append(self.labels_dict.get(default_label))
+            # Count the number of predictions of each type and print the result
+            print(collections.Counter(predicted_labels))
+        else:
+            # retrieve multiple labels for each prediction since multiple classification tasks are performed at a time
+            print(f"Retrieving predictions for {self.label_dims} dimensions...")
+            for prediction in predictions:
+                labels_in_prediction = []
+                for dim in self.labels_dict.keys():
+                    dim_label = []
+                    for label in self.labels_dict[dim].keys():
+                        if label in prediction:
+                            dim_label.append(self.labels_dict[dim].get(label))   
+                    dim_label = dim_label[0] if len(dim_label) > 0 else self.labels_dict[dim].get(default_label)
+                    labels_in_prediction.append(dim_label)                                            
+                predicted_labels.append(labels_in_prediction)
+            # Count the number of predictions of each type and print the result
+            print(collections.Counter([",".join(labels) for labels in predicted_labels]))
+        
+        # Add the data to the DataFrame
+        if self.label_dims == 1:
+            df = pd.DataFrame({'prompt': prompts, 'prediction': predicted_labels})
+        elif self.label_dims > 1:
+            if only_dim is not None:
+                # retrieve only the predictions for a specific dimension
+                print(f"Retrieved predictions for dimension {only_dim}")
+                df = pd.DataFrame({'prompt': prompts, 'prediction': pd.DataFrame(predicted_labels).to_numpy()[:,only_dim]})
+            else:
+                print("Retrieved predictions for all dimensions")
+                df = pd.DataFrame(predicted_labels).fillna(default_label)
+                # rename columns to prediction_n
+                df.columns = [f"prediction_dim{i}" for i in range(1, len(df.columns)+1)]
+                # add prompts to df
+                df['prompt'] = prompts
+
+        return df
+
+    def evaluate_predictions(self, df, gold_labels):
+
+
+        # Add the gold labels to df
+        if isinstance(gold_labels, pd.DataFrame):
+            for col in gold_labels.columns:
+                df['gold_' + col] = gold_labels[col]    
+        elif isinstance(gold_labels, list):
+            df['gold'] = gold_labels
+        else:
+            raise ValueError('The gold labels must be either a list or a DataFrame.')
+        
+        print(df.head())
+        
+        # define gold_labels method variable
+        gold_labels = df.filter(regex='^gold', axis=1)
+
+        # retrieve the name of each gold annotation
+        gold_names = [col.split('gold_')[-1] for col in gold_labels.columns]
+
+        # define tables where to store results
+        df_kappa = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+        df_accuracy = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+        df_f1 = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
+
+        for i, col in enumerate(gold_labels.columns):
+            # compare agreement with gold labels
+            kappa = cohen_kappa_score(df['prediction'].astype(str), gold_labels[col].astype(str))
+            accuracy = accuracy_score(df['prediction'].astype(str), gold_labels[col].astype(str))
+            f1 = f1_score(df['prediction'].astype(str), gold_labels[col].astype(str), average='macro')
+            # store results
+            df_kappa.loc['model', gold_names[i]] = df_kappa.loc[gold_names[i], 'model'] = kappa
+            df_accuracy.loc['model', gold_names[i]] = df_accuracy.loc[gold_names[i], 'model'] = accuracy
+            df_f1.loc['model', gold_names[i]] = df_f1.loc[gold_names[i], 'model'] = f1
+
+            if len(gold_labels.columns) > 1:
+                for j, col2 in enumerate(gold_labels.columns):
+                    if i < j:
+                        # compare agreement of gold labels with each other
+                        kappa = cohen_kappa_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
+                        accuracy = accuracy_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
+                        f1 = f1_score(gold_labels[col].astype(str), gold_labels[col2].astype(str), average='macro')
+                        # store results
+                        df_kappa.loc[gold_names[i], gold_names[j]] = df_kappa.loc[gold_names[j], gold_names[i]] = kappa
+                        df_accuracy.loc[gold_names[i], gold_names[j]] = df_accuracy.loc[gold_names[j], gold_names[i]] = accuracy
+                        df_f1.loc[gold_names[i], gold_names[j]] = df_f1.loc[gold_names[j], gold_names[i]] = f1
+
+        # in case of multiple gold annotations, there could be a column "gold_agg",
+        # referring to the aggregated annotation (computed with tools like MACE)
+        non_agg_names = [name for name in gold_names if 'agg' not in name]
+
+        # compute average agreement between gold annotations (except the aggregated one)
+        if len(gold_labels.columns) > 1:
+            df_kappa['mean_non_agg'] = df_kappa[non_agg_names].mean(axis=1)
+            df_accuracy['mean_non_agg'] = df_accuracy[non_agg_names].mean(axis=1) 
+            df_f1['mean_non_agg'] = df_f1[non_agg_names].mean(axis=1)
+            for name in non_agg_names:
+                # correct for humans fully agreeing with themselves
+                df_kappa.mean_non_agg[name] = (df_kappa[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
+                df_accuracy.mean_non_agg[name] = (df_accuracy[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
+                df_f1.mean_non_agg[name] = (df_f1[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
+        
+        # print info
+        print('KAPPA:')
+        print(df_kappa.round(4)*100)
+        print()
+        if len(gold_labels.columns) > 1:
+            print(f"Annotators' mean kappa: {100*df_kappa.mean_non_agg[:-1].mean():.2f}")
+            print(f"Model's mean kappa: {100*df_kappa.model[:-1].mean():.2f}")
+            print(f'Diff in mean kappa: {100*(df_kappa.mean_non_agg[:-1].mean() - df_kappa.model[:-1].mean()):.2f}')
+        print()
+        print('ACCURACY:')
+        print(df_accuracy.round(4)*100)
+        print()
+        if len(gold_labels.columns) > 1:
+            print(f"Annotators' mean accuracy: {100*df_accuracy.mean_non_agg[:-1].mean():.2f}") 
+            print(f"Model's mean accuracy: {100*df_accuracy.model[:-1].mean():.2f}")
+            print(f'Diff in mean accuracy: {100*(df_accuracy.mean_non_agg[:-1].mean() - df_accuracy.model[:-1].mean()):.2f}')
+        print()
+        print('F1:')
+        print(df_f1.round(4)*100)
+        print()
+        if len(gold_labels.columns) > 1:
+            print(f"Annotators' mean F1: {100*df_f1.mean_non_agg[:-1].mean():.2f}")
+            print(f"Model's mean F1: {100*df_f1.model[:-1].mean():.2f}")
+            print(f'Diff in mean F1: {100*(df_f1.mean_non_agg[:-1].mean() - df_f1.model[:-1].mean()):.2f}')
+
+        return df_kappa, df_accuracy, df_f1
+
+class GPTClassifier(LMClassifier):
+    def __init__(self, input_texts, labels_dict, gold_labels):
         """
         Args:
             input_texts (List[str]): List of input texts to generate predictions for.
-            dict_labels (Dict[str, int]): Dictionary mapping label names to label IDs.
+            labels_dict (Dict[str, int]): Dictionary mapping label names to label IDs.
             gold_labels (Union[pd.DataFrame, List[str]]): Gold labels corresponding to the input texts.
         """
-
+        super().__init__(input_texts, labels_dict, gold_labels)
         openai.api_key = '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'    
-        self.input_texts = input_texts
-        self.dict_labels = dict_labels
-        self.gold_labels = gold_labels
 
     def generate_predictions(self, instruction, output_prompt, model_name, max_len_model, default_label):
         """
@@ -153,138 +277,17 @@ class GPTClassifier:
         print(collections.Counter(predictions))
 
         return prompts, predictions
-    
-    def generate_predictions_df(self, predictions, default_label, prompts=None):
 
-        # Lowercase the predictions
-        # predictions =  list(map(str.lower,predictions))
+class HFClassifier(LMClassifier):
 
-        # TODO: Map the predictions to the labels (or empty string if label not found)
-        # for now, just use the predictions as is. If only a substring equals a label, it does not get mapped to the label.
-        predictions = retrieve_labels(predictions, self.dict_labels, default_label, method='first_label_match')
-        
-        # Count the number of predictions of each type and print the result
-        print(collections.Counter(predictions))
-
-        # Add the data to the DataFrame
-        self.df = pd.DataFrame({'prompt': prompts, 'prediction': predictions})
-
-        return self.df
-
-    def evaluate_predictions(self):
-        """
-        Evaluate the generated predictions against the gold labels and compute evaluation metrics.
-
-        Returns:
-            Tuple[pd.DataFrame, pd.DataFrame]: DataFrames containing the accuracy and kappa values.
-        """
-
-        # Add the gold labels to df
-        if isinstance(self.gold_labels, pd.DataFrame):
-            for col in self.gold_labels.columns:
-                self.df['gold_' + col] = self.gold_labels[col]    
-        elif isinstance(self.gold_labels, list):
-            self.df['gold'] = self.gold_labels
-        else:
-            raise ValueError('The gold labels must be either a list or a DataFrame.')
-        
-        # define gold_labels method variable
-        gold_labels = self.df.filter(regex='^gold', axis=1)
-
-        # retrieve the name of each gold annotation
-        gold_names = [col.split('gold_')[-1] for col in gold_labels.columns]
-
-        # define tables where to store results
-        self.df_kappa = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
-        self.df_accuracy = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
-        self.df_f1 = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
-
-        for i, col in enumerate(gold_labels.columns):
-            # compare agreement with gold labels
-            kappa = cohen_kappa_score(self.df['prediction'].astype(str), gold_labels[col].astype(str))
-            accuracy = accuracy_score(self.df['prediction'].astype(str), gold_labels[col].astype(str))
-            f1 = f1_score(self.df['prediction'].astype(str), gold_labels[col].astype(str), average='macro')
-            # store results
-            self.df_kappa.loc['model', gold_names[i]] = self.df_kappa.loc[gold_names[i], 'model'] = kappa
-            self.df_accuracy.loc['model', gold_names[i]] = self.df_accuracy.loc[gold_names[i], 'model'] = accuracy
-            self.df_f1.loc['model', gold_names[i]] = self.df_f1.loc[gold_names[i], 'model'] = f1
-
-            if len(gold_labels.columns) > 1:
-                for j, col2 in enumerate(gold_labels.columns):
-                    if i < j:
-                        # compare agreement of gold labels with each other
-                        kappa = cohen_kappa_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
-                        accuracy = accuracy_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
-                        f1 = f1_score(gold_labels[col].astype(str), gold_labels[col2].astype(str), average='macro')
-                        # store results
-                        self.df_kappa.loc[gold_names[i], gold_names[j]] = self.df_kappa.loc[gold_names[j], gold_names[i]] = kappa
-                        self.df_accuracy.loc[gold_names[i], gold_names[j]] = self.df_accuracy.loc[gold_names[j], gold_names[i]] = accuracy
-                        self.df_f1.loc[gold_names[i], gold_names[j]] = self.df_f1.loc[gold_names[j], gold_names[i]] = f1
-
-        # in case of multiple gold annotations, there could be a column "gold_agg",
-        # referring to the aggregated annotation (computed with tools like MACE)
-        non_agg_names = [name for name in gold_names if 'agg' not in name]
-
-        # compute average agreement between gold annotations (except the aggregated one)
-        if len(gold_labels.columns) > 1:
-            self.df_kappa['mean_non_agg'] = self.df_kappa[non_agg_names].mean(axis=1)
-            self.df_accuracy['mean_non_agg'] = self.df_accuracy[non_agg_names].mean(axis=1) 
-            self.df_f1['mean_non_agg'] = self.df_f1[non_agg_names].mean(axis=1)
-            for name in non_agg_names:
-                # correct for humans fully agreeing with themselves
-                self.df_kappa.mean_non_agg[name] = (self.df_kappa[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
-                self.df_accuracy.mean_non_agg[name] = (self.df_accuracy[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
-                self.df_f1.mean_non_agg[name] = (self.df_f1[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
-        
-        # print info
-        print('KAPPA:')
-        print(self.df_kappa.round(4)*100)
-        print()
-        if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean kappa: {100*self.df_kappa.mean_non_agg[:-1].mean():.2f}")
-            print(f"Model's mean kappa: {100*self.df_kappa.model[:-1].mean():.2f}")
-            print(f'Diff in mean kappa: {100*(self.df_kappa.mean_non_agg[:-1].mean() - self.df_kappa.model[:-1].mean()):.2f}')
-        print()
-        print('ACCURACY:')
-        print(self.df_accuracy.round(4)*100)
-        print()
-        if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean accuracy: {100*self.df_accuracy.mean_non_agg[:-1].mean():.2f}") 
-            print(f"Model's mean accuracy: {100*self.df_accuracy.model[:-1].mean():.2f}")
-            print(f'Diff in mean accuracy: {100*(self.df_accuracy.mean_non_agg[:-1].mean() - self.df_accuracy.model[:-1].mean()):.2f}')
-        print()
-        print('F1:')
-        print(self.df_f1.round(4)*100)
-        print()
-        if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean F1: {100*self.df_f1.mean_non_agg[:-1].mean():.2f}")
-            print(f"Model's mean F1: {100*self.df_f1.model[:-1].mean():.2f}")
-            print(f'Diff in mean F1: {100*(self.df_f1.mean_non_agg[:-1].mean() - self.df_f1.model[:-1].mean()):.2f}')
-
-        return self.df_kappa, self.df_accuracy, self.df_f1
-
-class HFClassifier:
-    """
-    Classifier for generating predictions using a language model
-    from the Huggingface Hub and evaluating the predictions.
-
-    Attributes:
-        df (pd.DataFrame): DataFrame containing the generated predictions and gold labels.
-        df_accuracy (pd.DataFrame): DataFrame containing the accuracy of the predictions.
-        df_kappa (pd.DataFrame): DataFrame containing the Cohen's kappa of the predictions.
-    """
-
-    def __init__(self, input_texts, dict_labels, gold_labels):
+    def __init__(self, input_texts, labels_dict, gold_labels):
         """
         Args:
             input_texts (List[str]): List of input texts to generate predictions for.
-            dict_labels (Dict[str, int]): Dictionary mapping label names to label IDs.
+            labels_dict (Dict[str, int]): Dictionary mapping label names to label IDs.
             gold_labels (Union[pd.DataFrame, List[str]]): Gold labels corresponding to the input texts.
         """
-                
-        self.input_texts = input_texts
-        self.dict_labels = dict_labels
-        self.gold_labels = gold_labels
+        super().__init__(input_texts, labels_dict, gold_labels)
 
     def generate_predictions(self, instruction, output_prompt, model_name, cache_dir, max_len_model, default_label):
         """
@@ -319,7 +322,7 @@ class HFClassifier:
         output = output_prompt
 
         # Encode the labels
-        encoded_labels = tokenizer(list(self.dict_labels.keys()), padding=True, truncation=True, return_tensors="pt")['input_ids']
+        encoded_labels = tokenizer(list(self.labels_dict.keys()), padding=True, truncation=True, return_tensors="pt")['input_ids']
         print(f'Encoded labels: \n{encoded_labels}')
         # Retrieve the tokens associated to encoded labels and print them
         # decoded_labels = tokenizer.batch_decode(encoded_labels)
@@ -384,105 +387,12 @@ class HFClassifier:
 
         # TODO: Map the predictions to the labels (or empty string if label not found)
         # for now, just use the predictions as is. If only a substring equals a label, it does not get mapped to the label.
-        predictions = [self.dict_labels.get(word) for word in predictions]
+        predictions = [self.labels_dict.get(word) for word in predictions]
         
         # Count the number of predictions of each type and print the result
         print(collections.Counter(predictions))
 
         # Add the data to the DataFrame
-        self.df = pd.DataFrame({'time': time, 'prompt': prompts, 'prediction': predictions})
+        df = pd.DataFrame({'time': time, 'prompt': prompts, 'prediction': predictions})
 
-        return self.df
-
-    def evaluate_predictions(self):
-        """
-        Evaluate the generated predictions against the gold labels and compute evaluation metrics.
-
-        Returns:
-            Tuple[pd.DataFrame, pd.DataFrame]: DataFrames containing the accuracy and kappa values.
-        """
-
-        # Add the gold labels to df
-        if isinstance(self.gold_labels, pd.DataFrame):
-            for col in self.gold_labels.columns:
-                self.df['gold_' + col] = self.gold_labels[col]    
-        elif isinstance(self.gold_labels, list):
-            self.df['gold'] = self.gold_labels
-        else:
-            raise ValueError('The gold labels must be either a list or a DataFrame.')
-        
-        # define gold_labels method variable
-        gold_labels = self.df.filter(regex='^gold', axis=1)
-
-        # retrieve the name of each gold annotation
-        gold_names = [col.split('gold_')[-1] for col in gold_labels.columns]
-
-        # define tables where to store results
-        self.df_kappa = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
-        self.df_accuracy = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
-        self.df_f1 = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
-
-
-        for i, col in enumerate(gold_labels.columns):
-            # compare agreement with gold labels
-            kappa = cohen_kappa_score(self.df['prediction'].astype(str), gold_labels[col].astype(str))
-            accuracy = accuracy_score(self.df['prediction'].astype(str), gold_labels[col].astype(str))
-            f1 = f1_score(self.df['prediction'].astype(str), gold_labels[col].astype(str), average='macro')
-            # store results
-            self.df_kappa.loc['model', gold_names[i]] = self.df_kappa.loc[gold_names[i], 'model'] = kappa
-            self.df_accuracy.loc['model', gold_names[i]] = self.df_accuracy.loc[gold_names[i], 'model'] = accuracy
-            self.df_f1.loc['model', gold_names[i]] = self.df_f1.loc[gold_names[i], 'model'] = f1
-
-            if len(gold_labels.columns) > 1:
-                for j, col2 in enumerate(gold_labels.columns):
-                    if i < j:
-                        # compare agreement of gold labels with each other
-                        kappa = cohen_kappa_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
-                        accuracy = accuracy_score(gold_labels[col].astype(str), gold_labels[col2].astype(str))
-                        f1 = f1_score(gold_labels[col].astype(str), gold_labels[col2].astype(str), average='macro')
-                        # store results
-                        self.df_kappa.loc[gold_names[i], gold_names[j]] = self.df_kappa.loc[gold_names[j], gold_names[i]] = kappa
-                        self.df_accuracy.loc[gold_names[i], gold_names[j]] = self.df_accuracy.loc[gold_names[j], gold_names[i]] = accuracy
-                        self.df_f1.loc[gold_names[i], gold_names[j]] = self.df_f1.loc[gold_names[j], gold_names[i]] = f1
-
-        # in case of multiple gold annotations, there could be a column "gold_agg",
-        # referring to the aggregated annotation (computed with tools like MACE)
-        non_agg_names = [name for name in gold_names if 'agg' not in name]
-
-        # compute average agreement between gold annotations (except the aggregated one)
-        if len(gold_labels.columns) > 1:
-            self.df_kappa['mean_non_agg'] = self.df_kappa[non_agg_names].mean(axis=1)
-            self.df_accuracy['mean_non_agg'] = self.df_accuracy[non_agg_names].mean(axis=1) 
-            self.df_f1['mean_non_agg'] = self.df_f1[non_agg_names].mean(axis=1)
-            for name in non_agg_names:
-                # correct for humans fully agreeing with themselves
-                self.df_kappa.mean_non_agg[name] = (self.df_kappa[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
-                self.df_accuracy.mean_non_agg[name] = (self.df_accuracy[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
-                self.df_f1.mean_non_agg[name] = (self.df_f1[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
-        
-        # print info
-        print('KAPPA:')
-        print(self.df_kappa.round(4)*100)
-        print()
-        if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean kappa: {100*self.df_kappa.mean_non_agg[:-1].mean():.2f}")
-            print(f"Model's mean kappa: {100*self.df_kappa.model[:-1].mean():.2f}")
-            print(f'Diff in mean kappa: {100*(self.df_kappa.mean_non_agg[:-1].mean() - self.df_kappa.model[:-1].mean()):.2f}')
-        print()
-        print('ACCURACY:')
-        print(self.df_accuracy.round(4)*100)
-        print()
-        if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean accuracy: {100*self.df_accuracy.mean_non_agg[:-1].mean():.2f}") 
-            print(f"Model's mean accuracy: {100*self.df_accuracy.model[:-1].mean():.2f}")
-            print(f'Diff in mean accuracy: {100*(self.df_accuracy.mean_non_agg[:-1].mean() - self.df_accuracy.model[:-1].mean()):.2f}')
-        print()
-        print('F1:')
-        print(self.df_f1.round(4)*100)
-        print()
-        if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean F1: {100*self.df_f1.mean_non_agg[:-1].mean():.2f}")
-            print(f"Model's mean F1: {100*self.df_f1.model[:-1].mean():.2f}")
-            print(f'Diff in mean F1: {100*(self.df_f1.mean_non_agg[:-1].mean() - self.df_f1.model[:-1].mean()):.2f}')
-
-        return self.df_kappa, self.df_accuracy, self.df_f1
+        return df

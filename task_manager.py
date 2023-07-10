@@ -10,7 +10,48 @@ class TaskManager:
     def __init__(self, task):
  
         self.task_dict = {
+            'pappa_all': {
+                'label_dims': 3,
+                'labels': {
+                    'dim1': {
+                        'not_applicable': 'NA',
+                        'passive': 'PASSIVE',
+                        'active_negative': 'ACTIVE_NEG',
+                        'active_positive_challenging': 'ACTIVE_POS_CHALLENGING',
+                        'active_positive_caring': 'ACTIVE_POS_CARING',
+                        'active_positive_other': 'ACTIVE_POS_OTHER',
+                    },
+                    'dim2': {
+                        'not_applicable': 'NA',
+                        'explicit': 'EXPLICIT',
+                        'implicit': 'IMPLICIT',
+                    },
+                    'dim3': {
+                        'not_applicable': 'NA',
+                        'descriptive': 'DESCRIPTIVE',
+                        'ideal': 'IDEAL'
+                    },
+                },
+                'read_function': self.read_data_pappa,
+            },
+            'pappa_all_together': {
+                'label_dims': 1,
+                'labels': {
+                    'not_applicable': 'NA',
+                    'passive': 'PASSIVE',
+                    'active_negative': 'ACTIVE_NEG',
+                    'active_positive_challenging': 'ACTIVE_POS_CHALLENGING',
+                    'active_positive_caring': 'ACTIVE_POS_CARING',
+                    'active_positive_other': 'ACTIVE_POS_OTHER',
+                    'explicit': 'EXPLICIT',
+                    'implicit': 'IMPLICIT',
+                    'descriptive': 'DESCRIPTIVE',
+                    'ideal': 'IDEAL'
+                    },
+                'read_function': self.read_data_pappa,
+            },
             'pappa_dim1': {
+                'label_dims': 1,
                 'labels': {
                     'not_applicable': 'NA',
                     'passive': 'PASSIVE',
@@ -22,6 +63,7 @@ class TaskManager:
                 'read_function': self.read_data_pappa,
             },
             'pappa_dim1_reduced': {
+                'label_dims': 1,
                 'labels': {'not_applicable': 'NA',
                            'passive': 'PASSIVE',
                            'active_negative': 'ACTIVE_NEG',
@@ -29,6 +71,7 @@ class TaskManager:
                 'read_function': self.read_data_pappa,
             },
             'pappa_dim1_binary': {
+                'label_dims': 1,
                 'labels': {
                     'not_applicable': 'NA',
                     'passive': 'PAS',
@@ -37,6 +80,7 @@ class TaskManager:
                 'read_function': self.read_data_pappa,
             },
             'pappa_dim1_dirk': {
+                'label_dims': 1,
                 'labels': {
                     'NA': 'NA',
                     'PASSIVE': 'PASSIVE',
@@ -48,6 +92,7 @@ class TaskManager:
                 'read_function': self.read_data_pappa,
             },
             'pappa_dim2': {
+                'label_dims': 1,
                 'labels': {
                     'explicit': 'EXPLICIT',
                     'implicit': 'IMPLICIT'
@@ -55,6 +100,7 @@ class TaskManager:
                 'read_function': self.read_data_pappa,
             },
             'pappa_dim3': {
+                'label_dims': 1,
                 'labels': {
                     'descriptive': 'DESCRIPTIVE',
                     'ideal': 'IDEAL'
@@ -63,9 +109,10 @@ class TaskManager:
             },             
         }
         self.task = self.task_dict[task]
+        self.label_dims = self.task['label_dims']
         self.labels = self.task['labels']
         # select the first label in the dictionary as default
-        self.default_label = list(self.labels.keys())[0]
+        self.default_label = list(self.labels.keys())[0] if self.label_dims == 1 else list(self.labels['dim1'].keys())[0]
         self.read_data = self.task['read_function']
 
     @staticmethod

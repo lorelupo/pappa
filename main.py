@@ -78,7 +78,7 @@ OPENAI_MODELS = [
     "curie-codex",
 ]
 
-def main(data_file, task, instruction, output_prompt, model_name, max_len_model, output_dir, cache_dir=None, evaluation_only=False):
+def main(data_file, task, instruction, output_prompt, model_name, max_len_model, output_dir, cache_dir=None, evaluation_only=False, only_dim=None):
     # Duplicate the output to stdout and a log file
     # strip points and slashes from the model name
     model_name_short = model_name.split("/")[-1].replace(".", "")
@@ -97,10 +97,9 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
         tm = TaskManager(task)
         input_texts, gold_labels = tm.read_data(data_file)
 
-        
         if model_name in OPENAI_MODELS:
             # Define classifier
-            classifier = GPTClassifier(input_texts, tm.labels, gold_labels)
+            classifier = GPTClassifier(input_texts, tm.labels, tm.label_dims)
 
             if not evaluation_only:
                 # Generate raw predictions
@@ -123,19 +122,20 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
                     predictions = f.read().splitlines()
                 prompts = None
                 
-            classifier.generate_predictions_df(
+            df_predicted_labels = classifier.retrieve_predicted_labels(
                 predictions=predictions,
                 default_label=tm.default_label,
                 prompts=prompts,
-            )
+                only_dim=only_dim
+                )
 
         else:
             # Define classifier
-            classifier = HFClassifier(input_texts, tm.labels, gold_labels)
+            classifier = HFClassifier(input_texts, tm.labels)
 
             if not evaluation_only:
                 # Generate predictions
-                classifier.generate_predictions(
+                df_predicted_labels = classifier.generate_predictions(
                     instruction=instruction,
                     output_prompt=output_prompt,
                     model_name=model_name,
@@ -145,13 +145,13 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
                     )
 
         # Evaluate predictions
-        classifier.evaluate_predictions()  
+        df_kappa, df_accuracy, df_f1 = classifier.evaluate_predictions(df=df_predicted_labels, gold_labels=gold_labels)
 
         # Save results
-        classifier.df.to_csv(os.path.join(output_dir, 'pre.tsv'), sep="\t", index=True)
-        classifier.df_accuracy.to_csv(os.path.join(output_dir, 'acc.tsv'), sep="\t", index=True)
-        classifier.df_kappa.to_csv(os.path.join(output_dir, 'kap.tsv'), sep="\t", index=True)
-        classifier.df_f1.to_csv(os.path.join(output_dir, 'f1.tsv'), sep="\t", index=True)
+        df_predicted_labels.to_csv(os.path.join(output_dir, f'pre_dim.tsv'), sep="\t", index=True)
+        df_kappa.to_csv(os.path.join(output_dir, f'kap_dim.tsv'), sep="\t", index=True)
+        df_accuracy.to_csv(os.path.join(output_dir, f'acc_dim.tsv'), sep="\t", index=True)
+        df_f1.to_csv(os.path.join(output_dir, f'f1_dim.tsv'), sep="\t", index=True)
 
 if __name__ == "__main__":
     fire.Fire(main)
