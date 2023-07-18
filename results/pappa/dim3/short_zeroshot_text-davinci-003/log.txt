@@ -1,0 +1,72 @@
+Label the Swedish text according to how it describes the role of the father in the family.
+Possible labels are: 
+-descriptive: if the sentence describes a state, like “we see that fathers are active”
+-ideal: if the sentence is prescriptive, like “we wish for more active fathers”
+-not_applicable: not applicable.
+
+Text:  man kan samtidigt disku- tera om det är lämpligt att surrogatmodern och den tilltänkta fadern gemensamt blir rättsliga föräldrar till ett barn , och att det förhåll- andet kan bli bestående om surrogatmodern väljer att inte avsäga sig föräldraskapet . 
+Label: 
+Prompt n.6 was too long, so we removed words from it. Approx original length: 13613, approx new length: 4189
+Processed 20 sentences
+Processed 40 sentences
+Processed 60 sentences
+Processed 80 sentences
+Processed 100 sentences
+Processed 120 sentences
+Processed 140 sentences
+Processed 160 sentences
+Processed 180 sentences
+Processed 200 sentences
+Processed 220 sentences
+Processed 240 sentences
+Processed 260 sentences
+Processed 280 sentences
+Processed 300 sentences
+Processed 320 sentences
+Processed 340 sentences
+Counter({'not_applicable': 251, 'descriptive': 86, 'ideal': 9, 'Descriptive': 4})
+Retrieving predictions...
+Counter({'NA': 251, 'DESCRIPTIVE': 90, 'IDEAL': 9})
+Evaluating predicitons...
+                                              prompt   prediction    gold_elin    gold_lena   gold_oscar gold_agg
+0  Label the Swedish text according to how it des...           NA        IDEAL        IDEAL  DESCRIPTIVE    IDEAL
+1  Label the Swedish text according to how it des...           NA  DESCRIPTIVE           NA           NA       NA
+2  Label the Swedish text according to how it des...           NA        IDEAL  DESCRIPTIVE  DESCRIPTIVE    IDEAL
+3  Label the Swedish text according to how it des...  DESCRIPTIVE        IDEAL        IDEAL        IDEAL    IDEAL
+4  Label the Swedish text according to how it des...           NA        IDEAL  DESCRIPTIVE  DESCRIPTIVE    IDEAL
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   34.47   48.82   97.26   10.54         41.64
+lena    34.47  100.00   39.52   38.31    6.17         37.00
+oscar   48.82   39.52  100.00   52.40    7.16         44.17
+agg     97.26   38.31   52.40  100.00   11.38         62.66
+model   10.54    6.17    7.16   11.38  100.00          7.96
+
+Annotators' mean kappa: 46.37
+Model's mean kappa: 8.81
+Diff in mean kappa: 37.55
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   62.57   70.57   98.29   40.57         66.57
+lena    62.57  100.00   71.71   64.29   34.29         67.14
+oscar   70.57   71.71  100.00   72.29   35.71         71.14
+agg     98.29   64.29   72.29  100.00   41.71         78.29
+model   40.57   34.29   35.71   41.71  100.00         36.86
+
+Annotators' mean accuracy: 70.79
+Model's mean accuracy: 38.07
+Diff in mean accuracy: 32.71
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   56.57   67.09   98.25   33.55         61.83
+lena    56.57  100.00   59.31   58.93   30.66         57.94
+oscar   67.09   59.31  100.00   69.40   31.78         63.20
+agg     98.25   58.93   69.40  100.00   34.23         75.53
+model   33.55   30.66   31.78   34.23  100.00         32.00
+
+Annotators' mean F1: 64.62
+Model's mean F1: 32.55
+Diff in mean F1: 32.07
+

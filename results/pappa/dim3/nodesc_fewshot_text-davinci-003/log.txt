@@ -1,0 +1,131 @@
+Label the Swedish text according to how it describes the role of the father in the family.
+Possible labels are: 
+-descriptive
+-ideal
+-not_applicable
+
+Text: i båda fallen är modern genetisk mor till barnet .
+Label: not_applicable
+
+Text: i de fall socialnämnden inte tar sitt ansvar eller inte lyckas , måste det ändå finnas rätt för nära anhöriga , som mor- och farföräldrar , att hos tingsrätten föra talan om umgänge .
+Label: not_applicable
+
+Text: det finns en överrepresentation bland fäder med låg utbildning , låg inkomst och pappor med utländsk bakgrund .
+Label: descriptive
+
+Text: visserligen är det obalans i uttaget av föräldraförsäkringen , men samtidigt är det viktigt att slå fast att fler pappor i dag tar ut föräldraledighet än före införandet av mamma- och pappamånaden .
+Label: descriptive
+
+Text: om barnets föräldrar varken är gifta eller registrerade samman- boende vid barnets födelse är mamman ensam vårdnadshavare .
+Label: descriptive
+
+Text: bland dem fanns män , kvinnor och barn , unga och gamla , fäder och mödrar , söner och döttrar , makar och syskon .
+Label: not_applicable
+
+Text: lagutskottet har tidigare anfört att man anser att den nuvarande ordningen ger betryggande garantier för att det verkligen är den biologiske fadern och inte någon annan som fastställs som far till ett barn ( 0000/00 : lu0 ) .
+Label: descriptive
+
+Text: i isf : s rapport dubbeldagar – pappors väg in i föräldrapenningen dras slutsatsen att pappors uttag under barnets första levnadsår har ökat och att pappor som tidigare valt att ej ta ut föräldrapenning nu börjat ta ut dagar .
+Label: descriptive
+
+Text: som förutsättning för alt barnavårdsnämnden skall vara skyldig att utreda om annan än den äkta mannen kan vara fader uppställer förslaget - utom att bamet skall ha viss anknytning lill sverige - dels att utredningen skall ha begärts av vårdnadshavare för barnet , d , v , s , normalt modern , eller av den äkta mannen , dels att det skall finnas lämpligt .
+Label: descriptive
+
+Text: genom projektet `` läs för mig pappa '' , knutet till arbetsplatsbibliotek , uppmuntras fäder att både läsa själva och att läsa för sina barn .
+Label: ideal
+
+Text: någon skyldighet att godkänna en utländsk dom om moderskap för barnets sociala eller genetiska mor , eller en utländsk dom om faderskap för en genetisk fars manliga partner , kan däremot inte utläsas av domstolens hittill- svarande praxis .
+Label: descriptive
+
+Text: här uppmanas pappor också att ta ett ansvar som läsande fäder .
+Label: ideal
+
+Text: av barnens svar kan man utläsa att mammor generellt har mer tid för sina barn oavsett i vilken utsträckning de bor med mamma , medan för barnen kan det ge mer tid med pappa när föräldrarna separerar än när de bor ihop under förutsättning att de minst bor halva tiden med pappan .
+Label: ideal
+
+Text: det är fullt möjligt att kommunicera kring varför för- äldraskapet så lätt upplevs som något som angår mamman mer än pappan , varför pappor kan känna sig som tillräckligt goda fäder trots ett mycket lågt uttag av föräldraledighet , varför mammor ofta tror att de är bättre på att läsa av barnet än vad pappor är , varför pappor uppfattas som hjältar när de gör samma sak som mammor gör av bara farten och tusen andra frågor som har att göra med för- äldraskapet som bekönad position .
+Label: ideal
+
+Text: då utmålas oftast pappan som hotfull , våldsam och som en dålig förälder .
+Label: descriptive
+
+Text: det vanliga är sedan att våldtäktsmannen -- om det inte var fadern eller en nära släkting som förövat dådet -- betalar flickans föräldrar för att de inte skall anmäla fallet till polisen .
+Label: descriptive
+
+Text: för att underlätta för framför allt fäder att öka sitt uttag av föräldrapen­ning föreslås att ersättningen utges med sjukpenningens belopp oberoende av den andre förälderns sjukpenning .
+Label: ideal
+
+Text: ha föräldrar gemensamt barn i sin värd , utgår föräldrapenning över garanlinivån lill fadern endast under förutsättning att även modern är eller enligt vad förut sagts bort vara försäkrad för sjukpenning som överstiger garantinivån .
+Label: descriptive
+
+Text:  man kan samtidigt disku- tera om det är lämpligt att surrogatmodern och den tilltänkta fadern gemensamt blir rättsliga föräldrar till ett barn , och att det förhåll- andet kan bli bestående om surrogatmodern väljer att inte avsäga sig föräldraskapet . 
+Label: 
+Prompt n.6 was too long, so we removed words from it. Approx original length: 15627, approx new length: 5358
+Error in generating prediction for prompt n.6: This model's maximum context length is 4097 tokens, however you requested 4588 tokens (4573 in your prompt; 15 for the completion). Please reduce your prompt; or completion length.
+Selected default label: not_applicable
+Processed 20 sentences
+Processed 40 sentences
+Processed 60 sentences
+Processed 80 sentences
+Processed 100 sentences
+Processed 120 sentences
+Processed 140 sentences
+Processed 160 sentences
+Processed 180 sentences
+Processed 200 sentences
+Processed 220 sentences
+Prompt n.233 was too long, so we removed words from it. Approx original length: 4715, approx new length: 4715
+Error in generating prediction for prompt n.233: This model's maximum context length is 4097 tokens, however you requested 4156 tokens (4141 in your prompt; 15 for the completion). Please reduce your prompt; or completion length.
+Selected default label: not_applicable
+Processed 240 sentences
+Processed 260 sentences
+Processed 280 sentences
+Processed 300 sentences
+Processed 320 sentences
+Processed 340 sentences
+Counter({'descriptive': 233, 'ideal': 71, 'not_applicable': 46})
+Retrieving predictions...
+Counter({'DESCRIPTIVE': 233, 'IDEAL': 71, 'NA': 46})
+Evaluating predicitons...
+                                              prompt   prediction    gold_elin    gold_lena   gold_oscar gold_agg
+0  Label the Swedish text according to how it des...  DESCRIPTIVE        IDEAL        IDEAL  DESCRIPTIVE    IDEAL
+1  Label the Swedish text according to how it des...           NA  DESCRIPTIVE           NA           NA       NA
+2  Label the Swedish text according to how it des...  DESCRIPTIVE        IDEAL  DESCRIPTIVE  DESCRIPTIVE    IDEAL
+3  Label the Swedish text according to how it des...        IDEAL        IDEAL        IDEAL        IDEAL    IDEAL
+4  Label the Swedish text according to how it des...  DESCRIPTIVE        IDEAL  DESCRIPTIVE  DESCRIPTIVE    IDEAL
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   34.47   48.82   97.26   40.35         41.64
+lena    34.47  100.00   39.52   38.31   33.60         37.00
+oscar   48.82   39.52  100.00   52.40   45.31         44.17
+agg     97.26   38.31   52.40  100.00   41.12         62.66
+model   40.35   33.60   45.31   41.12  100.00         39.75
+
+Annotators' mean kappa: 46.37
+Model's mean kappa: 40.10
+Diff in mean kappa: 6.27
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   62.57   70.57   98.29   65.14         66.57
+lena    62.57  100.00   71.71   64.29   68.00         67.14
+oscar   70.57   71.71  100.00   72.29   73.14         71.14
+agg     98.29   64.29   72.29  100.00   65.14         78.29
+model   65.14   68.00   73.14   65.14  100.00         68.76
+
+Annotators' mean accuracy: 70.79
+Model's mean accuracy: 67.86
+Diff in mean accuracy: 2.93
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   56.57   67.09   98.25   61.00         61.83
+lena    56.57  100.00   59.31   58.93   57.76         57.94
+oscar   67.09   59.31  100.00   69.40   64.15         63.20
+agg     98.25   58.93   69.40  100.00   61.64         75.53
+model   61.00   57.76   64.15   61.64  100.00         60.97
+
+Annotators' mean F1: 64.62
+Model's mean F1: 61.14
+Diff in mean F1: 3.48
+

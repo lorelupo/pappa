@@ -1,8 +1,0 @@
-Classify the Swedish text according to how it describes the role of the father in the family.
-Possible labels are: 
--passive: fathers who are not actively involved in hands-on care and upbringing of the child;
--active_negative: fathers exhibiting harmful behaviors like aggression, violence, or neglect;
--active_positive: fathers demonstrating positive and nurturing roles in their child's life;
--not_applicable: not applicable.
-
-Text:
