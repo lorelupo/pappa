@@ -79,11 +79,12 @@ OPENAI_MODELS = [
 ]
 
 def main(data_file, task, instruction, output_prompt, model_name, max_len_model, output_dir, cache_dir=None, evaluation_only=False, only_dim=None):
+
     # Duplicate the output to stdout and a log file
     # strip points and slashes from the model name
-    model_name_short = model_name.split("/")[-1].replace(".", "")
-    instruction_name = instruction.split("/")[-1].split(".")[0]
-    output_base_dir = f'{output_dir}/{instruction_name}_{model_name_short}'
+    model_name_short = model_name.split("/")[-1].replace(".", "") # remove "username/" in case of HF models
+    instruction_name = "/".join(instruction.split("/")[1:]).split(".")[0] # remove "instruction/"" and ".txt" from the instruction path
+    output_base_dir = f"{output_dir}/{instruction_name}_{model_name_short}"
     output_dir = incremental_path(output_base_dir) if not evaluation_only else output_base_dir
     print('---'*10)
     print(f'Working on {output_dir}')
@@ -159,4 +160,3 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
 
 if __name__ == "__main__":
     fire.Fire(main)
-

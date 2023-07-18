@@ -1,0 +1,7 @@
+Label the Swedish text according to how it describes the role of the father in the family.
+Possible labels are: 
+-implicit
+-explicit
+-not_applicable
+
+Text: 

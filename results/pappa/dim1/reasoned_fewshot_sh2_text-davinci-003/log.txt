@@ -1,0 +1,180 @@
+Label the Swedish text according to how it describes the role of the father in the family.
+
+Possible labels are:
+-passive: this is a category that captures what is sometimes called the classical role given to and taken by fathers, which in essence is a role that does not include engaging with the child in person. Word used in theory might be “custodial parenthood”, “provider”, “breadwinner”, “process parenthood”. This is a person who is important in the life of the child, but is not involved in the hands-on caring and upbringing. Society includes norms and sometimes creates clarifying policies around this father, for his sake, as well as for the sake of the child and the mother. Envisioned indicators might be words denoting the father being the moneymaker or provider, or someone who provides genes or sperm or overall protection or security.
+-active: fathers who are actively engaged in caregiving and parenting responsibilities, even if negatively portrayed;
+-not_applicable: not applicable.
+
+If the label is active, further categorize it as:
+-active_positive: this is a category that captures the positive roles of fathers. Society needs to create policies around this father in order to encourage him.
+-active_negative: this is a category that captures the negative roles of fathers, such as the oppressive father, the harsh and violent father, as well as neglecting father. Society needs to create policies around this father in order to restrict/stop him.
+
+If the label is active_positive, further categorize it as:
+-active_positive_caring: this category focuses on what is stereotypically seen as the female parental role. Envisioned indicators would be words such as caring, warm, nurture, understanding, empathy, listening, comfort, confirming.
+-active_positive_challenging: this category focuses on what is stereotypically seen as the male parental role. Envisioned indicators would be things like strengthening activity, risk-taking, daring, try your limits, sport, outgoing, education (including reading to child, which is one of the recurring activities in the data).
+-active_positive_other: there are also other ways of being active as a father, and this category captures that. Most typically, this category indicates that the father is competent and reliable, and should be trusted with the child, but it does not single out why. Envisioned indicators are general references to competence, capability, responsibility, rights of and trust in fathers to handle information, take parental leave, get a parental allowance, be present in the life of the child, be an unspecified role model (“boys/girls need male role models”).
+
+Text: visserligen är det obalans i uttaget av föräldraförsäkringen , men samtidigt är det viktigt att slå fast att fler pappor i dag tar ut föräldraledighet än före införandet av mamma- och pappamånaden .
+Label: active_positive_other
+
+Text: ha föräldrar gemensamt barn i sin värd , utgår föräldrapenning över garanlinivån lill fadern endast under förutsättning att även modern är eller enligt vad förut sagts bort vara försäkrad för sjukpenning som överstiger garantinivån .
+Label: passive
+
+Text: i båda fallen är modern genetisk mor till barnet .
+Label: not_applicable
+
+Text: här uppmanas pappor också att ta ett ansvar som läsande fäder .
+Label: active_positive_challenging
+
+Text: i de fall socialnämnden inte tar sitt ansvar eller inte lyckas , måste det ändå finnas rätt för nära anhöriga , som mor- och farföräldrar , att hos tingsrätten föra talan om umgänge .
+Label: not_applicable
+
+Text: som förutsättning för alt barnavårdsnämnden skall vara skyldig att utreda om annan än den äkta mannen kan vara fader uppställer förslaget - utom att bamet skall ha viss anknytning lill sverige - dels att utredningen skall ha begärts av vårdnadshavare för barnet , d , v , s , normalt modern , eller av den äkta mannen , dels att det skall finnas lämpligt .
+Label: passive
+
+Text: bland dem fanns män , kvinnor och barn , unga och gamla , fäder och mödrar , söner och döttrar , makar och syskon .
+Label: not_applicable
+
+Text: lagutskottet har tidigare anfört att man anser att den nuvarande ordningen ger betryggande garantier för att det verkligen är den biologiske fadern och inte någon annan som fastställs som far till ett barn ( 0000/00 : lu0 ) .
+Label: passive
+
+Text: för att underlätta för framför allt fäder att öka sitt uttag av föräldrapen­ning föreslås att ersättningen utges med sjukpenningens belopp oberoende av den andre förälderns sjukpenning .
+Label: active_positive_other
+
+Text: det är fullt möjligt att kommunicera kring varför för- äldraskapet så lätt upplevs som något som angår mamman mer än pappan , varför pappor kan känna sig som tillräckligt goda fäder trots ett mycket lågt uttag av föräldraledighet , varför mammor ofta tror att de är bättre på att läsa av barnet än vad pappor är , varför pappor uppfattas som hjältar när de gör samma sak som mammor gör av bara farten och tusen andra frågor som har att göra med för- äldraskapet som bekönad position .
+Label: active_positive_caring
+
+Text: det finns en överrepresentation bland fäder med låg utbildning , låg inkomst och pappor med utländsk bakgrund .
+Label: passive
+
+Text: någon skyldighet att godkänna en utländsk dom om moderskap för barnets sociala eller genetiska mor , eller en utländsk dom om faderskap för en genetisk fars manliga partner , kan däremot inte utläsas av domstolens hittill- svarande praxis .
+Label: passive
+
+Text: av barnens svar kan man utläsa att mammor generellt har mer tid för sina barn oavsett i vilken utsträckning de bor med mamma , medan för barnen kan det ge mer tid med pappa när föräldrarna separerar än när de bor ihop under förutsättning att de minst bor halva tiden med pappan .
+Label: active_positive_other
+
+Text: det vanliga är sedan att våldtäktsmannen -- om det inte var fadern eller en nära släkting som förövat dådet -- betalar flickans föräldrar för att de inte skall anmäla fallet till polisen .
+Label: active_negative
+
+Text: om barnets föräldrar varken är gifta eller registrerade samman- boende vid barnets födelse är mamman ensam vårdnadshavare .
+Label: passive
+
+Text: genom projektet `` läs för mig pappa '' , knutet till arbetsplatsbibliotek , uppmuntras fäder att både läsa själva och att läsa för sina barn .
+Label: active_positive_challenging
+
+Text: då utmålas oftast pappan som hotfull , våldsam och som en dålig förälder .
+Label: active_negative
+
+Text: i isf : s rapport dubbeldagar – pappors väg in i föräldrapenningen dras slutsatsen att pappors uttag under barnets första levnadsår har ökat och att pappor som tidigare valt att ej ta ut föräldrapenning nu börjat ta ut dagar .
+Label: active_positive_other
+
+Text:  man kan samtidigt disku- tera om det är lämpligt att surrogatmodern och den tilltänkta fadern gemensamt blir rättsliga föräldrar till ett barn , och att det förhåll- andet kan bli bestående om surrogatmodern väljer att inte avsäga sig föräldraskapet . 
+Label: 
+Prompt n.6 was too long, so we removed words from it. Approx original length: 16827, approx new length: 6051
+Error in generating prediction for prompt n.6: This model's maximum context length is 4097 tokens, however you requested 4674 tokens (4659 in your prompt; 15 for the completion). Please reduce your prompt; or completion length.
+Selected default label: not_applicable
+Processed 20 sentences
+Processed 40 sentences
+Prompt n.58 was too long, so we removed words from it. Approx original length: 4256, approx new length: 4256
+Processed 60 sentences
+Processed 80 sentences
+Processed 100 sentences
+Processed 120 sentences
+Processed 140 sentences
+Processed 160 sentences
+Processed 180 sentences
+Processed 200 sentences
+Processed 220 sentences
+Prompt n.233 was too long, so we removed words from it. Approx original length: 5915, approx new length: 5915
+Error in generating prediction for prompt n.233: This model's maximum context length is 4097 tokens, however you requested 4726 tokens (4711 in your prompt; 15 for the completion). Please reduce your prompt; or completion length.
+Selected default label: not_applicable
+Processed 240 sentences
+Processed 260 sentences
+Prompt n.271 was too long, so we removed words from it. Approx original length: 4484, approx new length: 4484
+Processed 280 sentences
+Processed 300 sentences
+Processed 320 sentences
+Prompt n.326 was too long, so we removed words from it. Approx original length: 4474, approx new length: 4474
+Processed 340 sentences
+Counter({'passive': 145, 'not_applicable': 77, 'active_positive_other': 56, 'active_negative': 33, 'active_positive_caring': 33, 'active_positive_challenging': 5, 'active_positive': 1})
+Counter({'PASSIVE': 145, 'NA': 78, 'ACTIVE_POS_OTHER': 56, 'ACTIVE_NEG': 33, 'ACTIVE_POS_CARING': 33, 'ACTIVE_POS_CHALLENGING': 5})
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28   30.85         49.30
+lena    48.68  100.00   53.37   75.09   36.90         51.02
+oscar   49.93   53.37  100.00   78.19   40.14         51.65
+agg     67.28   75.09   78.19  100.00   40.66         73.52
+model   30.85   36.90   40.14   40.66  100.00         35.97
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 37.14
+Diff in mean kappa: 19.24
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86   42.57         61.29
+lena    60.86  100.00   66.86   81.71   51.71         63.86
+oscar   61.71   66.86  100.00   84.00   54.29         64.29
+agg     74.86   81.71   84.00  100.00   53.14         80.19
+model   42.57   51.71   54.29   53.14  100.00         49.52
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 50.43
+Diff in mean accuracy: 16.98
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   35.16         57.22
+lena    57.28  100.00   57.93   77.13   37.25         57.60
+oscar   57.15   57.93  100.00   81.33   42.09         57.54
+agg     68.85   77.13   81.33  100.00   40.03         75.77
+model   35.16   37.25   42.09   40.03  100.00         38.17
+
+Annotators' mean F1: 62.03
+Model's mean F1: 38.63
+Diff in mean F1: 23.40
+Retrieving predictions...
+Counter({'PASSIVE': 145, 'NA': 78, 'ACTIVE_POS_OTHER': 56, 'ACTIVE_NEG': 33, 'ACTIVE_POS_CARING': 33, 'ACTIVE_POS_CHALLENGING': 5})
+Evaluating predicitons...
+  prompt        prediction         gold_elin         gold_lena        gold_oscar          gold_agg
+0   None                NA           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+1   None                NA           PASSIVE                NA                NA                NA
+2   None           PASSIVE  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER           PASSIVE  ACTIVE_POS_OTHER
+3   None  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER
+4   None           PASSIVE           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28   42.90         49.30
+lena    48.68  100.00   53.37   75.09   47.92         51.02
+oscar   49.93   53.37  100.00   78.19   53.05         51.65
+agg     67.28   75.09   78.19  100.00   54.14         73.52
+model   42.90   47.92   53.05   54.14  100.00         47.96
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 49.50
+Diff in mean kappa: 6.87
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86   56.00         61.29
+lena    60.86  100.00   66.86   81.71   62.00         63.86
+oscar   61.71   66.86  100.00   84.00   66.00         64.29
+agg     74.86   81.71   84.00  100.00   65.71         80.19
+model   56.00   62.00   66.00   65.71  100.00         61.33
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 62.43
+Diff in mean accuracy: 4.98
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   50.12         57.22
+lena    57.28  100.00   57.93   77.13   52.41         57.60
+oscar   57.15   57.93  100.00   81.33   58.87         57.54
+agg     68.85   77.13   81.33  100.00   56.89         75.77
+model   50.12   52.41   58.87   56.89  100.00         53.80
+
+Annotators' mean F1: 62.03
+Model's mean F1: 54.57
+Diff in mean F1: 7.46
+

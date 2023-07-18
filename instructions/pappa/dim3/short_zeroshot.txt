@@ -1,0 +1,7 @@
+Label the Swedish text according to how it describes the role of the father in the family.
+Possible labels are: 
+-descriptive: if the sentence describes a state, like “we see that fathers are active”
+-ideal: if the sentence is prescriptive, like “we wish for more active fathers”
+-not_applicable: not applicable.
+
+Text: 

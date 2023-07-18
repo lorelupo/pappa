@@ -1,0 +1,206 @@
+Label the Swedish text according to how it describes the role of the father in the family.
+Possible labels are:
+-passive
+-active_negative
+-active_positive_caring
+-active_positive_challenging
+-active_positive_other
+-not_applicable
+
+Text:  man kan samtidigt disku- tera om det är lämpligt att surrogatmodern och den tilltänkta fadern gemensamt blir rättsliga föräldrar till ett barn , och att det förhåll- andet kan bli bestående om surrogatmodern väljer att inte avsäga sig föräldraskapet . 
+Label: 
+Prompt n.6 was too long, so we removed words from it. Approx original length: 13537, approx new length: 4148
+Processed 20 sentences
+Processed 40 sentences
+Processed 60 sentences
+Processed 80 sentences
+Processed 100 sentences
+Processed 120 sentences
+Processed 140 sentences
+Processed 160 sentences
+Processed 180 sentences
+Processed 200 sentences
+Processed 220 sentences
+Processed 240 sentences
+Processed 260 sentences
+Processed 280 sentences
+Processed 300 sentences
+Processed 320 sentences
+Processed 340 sentences
+Counter({'not_applicable': 234, 'active_positive_caring': 67, 'active_negative': 18, 'active_positive_other': 17, 'active_positive_challenging': 9, 'passive': 4, 'Not_Applicable': 1})
+Retrieving predictions...
+Counter({'NA': 235, 'ACTIVE_POS_CARING': 67, 'ACTIVE_NEG': 18, 'ACTIVE_POS_OTHER': 17, 'ACTIVE_POS_CHALLENGING': 9, 'PASSIVE': 4})
+                                              prompt         prediction    gold_gold_elin    gold_gold_lena   gold_gold_oscar     gold_gold_agg
+0  Label the Swedish text according to how it des...  ACTIVE_POS_CARING           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+1  Label the Swedish text according to how it des...                 NA           PASSIVE               NaN               NaN               NaN
+2  Label the Swedish text according to how it des...                 NA  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER           PASSIVE  ACTIVE_POS_OTHER
+3  Label the Swedish text according to how it des...                 NA  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER
+4  Label the Swedish text according to how it des...                 NA           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28    6.79         49.30
+lena    48.68  100.00   53.37   75.09    5.58         51.02
+oscar   49.93   53.37  100.00   78.19    7.36         51.65
+agg     67.28   75.09   78.19  100.00    7.29         73.52
+model    6.79    5.58    7.36    7.29  100.00          6.57
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 6.75
+Diff in mean kappa: 49.62
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86    9.71         61.29
+lena    60.86  100.00   66.86   81.71    8.29         63.86
+oscar   61.71   66.86  100.00   84.00   10.29         64.29
+agg     74.86   81.71   84.00  100.00   10.29         80.19
+model    9.71    8.29   10.29   10.29  100.00          9.43
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 9.64
+Diff in mean accuracy: 57.76
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   12.27         57.22
+lena    57.28  100.00   57.93   77.13   11.80         57.60
+oscar   57.15   57.93  100.00   81.33   16.62         57.54
+agg     68.85   77.13   81.33  100.00   14.74         75.77
+model   12.27   11.80   16.62   14.74  100.00         13.56
+
+Annotators' mean F1: 62.03
+Model's mean F1: 13.86
+Diff in mean F1: 48.18
+Retrieving predictions...
+Counter({'NA': 235, 'ACTIVE_POS_CARING': 67, 'ACTIVE_NEG': 18, 'ACTIVE_POS_OTHER': 17, 'ACTIVE_POS_CHALLENGING': 9, 'PASSIVE': 4})
+Evaluating predicitons...
+  prompt         prediction         gold_elin         gold_lena        gold_oscar          gold_agg
+0   None  ACTIVE_POS_CARING           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+1   None                 NA           PASSIVE                NA                NA                NA
+2   None                 NA  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER           PASSIVE  ACTIVE_POS_OTHER
+3   None                 NA  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER
+4   None                 NA           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28   16.63         49.30
+lena    48.68  100.00   53.37   75.09   10.04         51.02
+oscar   49.93   53.37  100.00   78.19   13.56         51.65
+agg     67.28   75.09   78.19  100.00   13.72         73.52
+model   16.63   10.04   13.56   13.72  100.00         13.41
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 13.49
+Diff in mean kappa: 42.88
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86   34.29         61.29
+lena    60.86  100.00   66.86   81.71   22.29         63.86
+oscar   61.71   66.86  100.00   84.00   26.57         64.29
+agg     74.86   81.71   84.00  100.00   27.43         80.19
+model   34.29   22.29   26.57   27.43  100.00         27.71
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 27.64
+Diff in mean accuracy: 39.76
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   23.03         57.22
+lena    57.28  100.00   57.93   77.13   19.38         57.60
+oscar   57.15   57.93  100.00   81.33   25.78         57.54
+agg     68.85   77.13   81.33  100.00   23.84         75.77
+model   23.03   19.38   25.78   23.84  100.00         22.73
+
+Annotators' mean F1: 62.03
+Model's mean F1: 23.01
+Diff in mean F1: 39.02
+Retrieving predictions...
+Counter({'NA': 235, 'ACTIVE_POS_CARING': 67, 'ACTIVE_NEG': 18, 'ACTIVE_POS_OTHER': 17, 'ACTIVE_POS_CHALLENGING': 9, 'PASSIVE': 4})
+Evaluating predicitons...
+  prompt         prediction         gold_elin         gold_lena        gold_oscar          gold_agg
+0   None  ACTIVE_POS_CARING           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+1   None                 NA           PASSIVE                NA                NA                NA
+2   None                 NA  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER           PASSIVE  ACTIVE_POS_OTHER
+3   None                 NA  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER
+4   None                 NA           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28   16.63         49.30
+lena    48.68  100.00   53.37   75.09   10.04         51.02
+oscar   49.93   53.37  100.00   78.19   13.56         51.65
+agg     67.28   75.09   78.19  100.00   13.72         73.52
+model   16.63   10.04   13.56   13.72  100.00         13.41
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 13.49
+Diff in mean kappa: 42.88
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86   34.29         61.29
+lena    60.86  100.00   66.86   81.71   22.29         63.86
+oscar   61.71   66.86  100.00   84.00   26.57         64.29
+agg     74.86   81.71   84.00  100.00   27.43         80.19
+model   34.29   22.29   26.57   27.43  100.00         27.71
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 27.64
+Diff in mean accuracy: 39.76
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   23.03         57.22
+lena    57.28  100.00   57.93   77.13   19.38         57.60
+oscar   57.15   57.93  100.00   81.33   25.78         57.54
+agg     68.85   77.13   81.33  100.00   23.84         75.77
+model   23.03   19.38   25.78   23.84  100.00         22.73
+
+Annotators' mean F1: 62.03
+Model's mean F1: 23.01
+Diff in mean F1: 39.02
+Retrieving predictions...
+Counter({'NA': 235, 'ACTIVE_POS_CARING': 67, 'ACTIVE_NEG': 18, 'ACTIVE_POS_OTHER': 17, 'ACTIVE_POS_CHALLENGING': 9, 'PASSIVE': 4})
+Evaluating predicitons...
+  prompt         prediction         gold_elin         gold_lena        gold_oscar          gold_agg
+0   None  ACTIVE_POS_CARING           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+1   None                 NA           PASSIVE                NA                NA                NA
+2   None                 NA  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER           PASSIVE  ACTIVE_POS_OTHER
+3   None                 NA  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER
+4   None                 NA           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28   16.63         49.30
+lena    48.68  100.00   53.37   75.09   10.04         51.02
+oscar   49.93   53.37  100.00   78.19   13.56         51.65
+agg     67.28   75.09   78.19  100.00   13.72         73.52
+model   16.63   10.04   13.56   13.72  100.00         13.41
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 13.49
+Diff in mean kappa: 42.88
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86   34.29         61.29
+lena    60.86  100.00   66.86   81.71   22.29         63.86
+oscar   61.71   66.86  100.00   84.00   26.57         64.29
+agg     74.86   81.71   84.00  100.00   27.43         80.19
+model   34.29   22.29   26.57   27.43  100.00         27.71
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 27.64
+Diff in mean accuracy: 39.76
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   23.03         57.22
+lena    57.28  100.00   57.93   77.13   19.38         57.60
+oscar   57.15   57.93  100.00   81.33   25.78         57.54
+agg     68.85   77.13   81.33  100.00   23.84         75.77
+model   23.03   19.38   25.78   23.84  100.00         22.73
+
+Annotators' mean F1: 62.03
+Model's mean F1: 23.01
+Diff in mean F1: 39.02
+

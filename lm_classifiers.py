@@ -16,6 +16,8 @@ AVG_TOKENS_PER_WORD_EN = 4/3 # according to: https://help.openai.com/en/articles
 AVG_TOKENS_PER_WORD_NONEN = 5 # adjust according to the language of the input text
 AVG_TOKENS_PER_WORD_AVG = (AVG_TOKENS_PER_WORD_EN + AVG_TOKENS_PER_WORD_NONEN) / 2
 
+GPT_SYSTEM_ROLE="You are a helpful assistant."
+
 @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
 def completions_with_backoff(**kwargs):
     return openai.Completion.create(**kwargs) 
@@ -187,6 +189,8 @@ class GPTClassifier(LMClassifier):
         """
         super().__init__(input_texts, labels_dict, gold_labels)
 
+        self.system_role = GPT_SYSTEM_ROLE
+
         # load environment variables
         load_dotenv('.env')
         openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -245,6 +249,7 @@ class GPTClassifier(LMClassifier):
                     gpt_out = chat_completions_with_backoff(
                         model=model_name,
                         messages=[
+                            {"role": "system","content": self.system_role},
                             {"role": "user", "content": prompt}
                         ],
                         temperature=0,

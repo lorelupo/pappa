@@ -94,6 +94,7 @@ class TaskManager:
             'pappa_dim2': {
                 'label_dims': 1,
                 'labels': {
+                    'not_applicable': 'NA',
                     'explicit': 'EXPLICIT',
                     'implicit': 'IMPLICIT'
                     },
@@ -102,6 +103,7 @@ class TaskManager:
             'pappa_dim3': {
                 'label_dims': 1,
                 'labels': {
+                    'not_applicable': 'NA',
                     'descriptive': 'DESCRIPTIVE',
                     'ideal': 'IDEAL'
                     },

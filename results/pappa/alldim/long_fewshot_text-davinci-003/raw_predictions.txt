@@ -1,0 +1,350 @@
+passive, explicit, descriptive
+not_applicable
+passive, implicit, descriptive
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+passive, implicit, descriptive
+not_applicable
+active_positive_challenging, explicit, ideal
+passive, explicit, descriptive
+passive, implicit, descriptive; active_positive_caring, implicit,
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, implicit, descriptive
+active_positive_caring, explicit, ideal
+not_applicable
+active_negative, explicit, descriptive
+active_positive_challenging, implicit, descriptive
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, implicit, descriptive
+not_applicable
+active_positive_other, explicit, descriptive
+active_positive_caring, explicit, descriptive
+active_positive_caring, implicit, ideal
+active_positive_other, explicit, ideal
+not_applicable
+active_positive_other, explicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, implicit, descriptive
+active_positive_other, explicit, ideal
+active_negative, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+active_positive_other, implicit, descriptive
+not_applicable
+passive, implicit, descriptive
+active_positive_other, implicit, ideal
+passive, explicit, descriptive
+not_applicable
+active_negative, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, implicit, ideal
+active_positive_caring, implicit, ideal
+passive, explicit, descriptive
+passive, explicit, descriptive
+not_applicable
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, implicit, descriptive
+passive, explicit, descriptive
+active_positive_caring, explicit, descriptive
+passive, implicit, descriptive
+active_positive_other, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+active_negative, explicit, descriptive
+active_positive_other, explicit, ideal
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+active_positive_other, explicit, ideal
+active_negative, implicit, descriptive
+active_positive_challenging, explicit, ideal
+not_applicable
+active_negative, explicit, descriptive
+active_positive_other, explicit, ideal
+not_applicable
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+active_positive_caring, explicit, ideal
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+passive, implicit, descriptive
+passive, implicit, descriptive
+active_positive_caring, implicit, ideal
+active_positive_other, explicit, ideal
+active_positive_other, explicit, ideal
+active_positive_other, explicit, ideal
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_negative, implicit, descriptive
+passive, implicit, descriptive
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, explicit, ideal
+passive, implicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, implicit, descriptive
+active_positive_caring, explicit, ideal
+active_positive_other, explicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+not_applicable
+active_positive_other, explicit, descriptive
+not_applicable
+active_positive_other, explicit, ideal
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+passive, implicit, descriptive
+active_positive_caring, explicit, ideal
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+active_positive_other, explicit, ideal
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, implicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, explicit, descriptive
+not_applicable
+active_negative, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, explicit, ideal
+not_applicable
+passive, implicit, descriptive
+active_positive_other, implicit, ideal
+passive, explicit, descriptive
+active_positive_caring, explicit, descriptive
+active_positive_other, explicit, descriptive
+active_positive_other, implicit, descriptive
+not_applicable
+active_positive_other, implicit, ideal
+passive, implicit, descriptive
+active_positive_other, explicit, ideal
+passive, implicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, implicit, descriptive
+active_positive_other, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, implicit, descriptive
+active_positive_caring, explicit, ideal
+passive, explicit, descriptive
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+not_applicable
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, implicit, descriptive
+active_positive_other, implicit, descriptive
+active_positive_other, implicit, descriptive
+active_positive_other, explicit, descriptive
+not_applicable
+active_positive_other, explicit, ideal
+active_positive_other, explicit, descriptive
+active_positive_other, implicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, implicit, descriptive
+active_positive_caring, explicit, ideal
+passive, explicit, descriptive
+passive, explicit, descriptive
+not_applicable
+active_positive_caring, explicit, ideal
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+active_positive_other, explicit, descriptive
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+active_positive_caring, explicit, descriptive
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+passive, implicit, descriptive
+passive, implicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+not_applicable
+active_positive_other, implicit, ideal
+passive, explicit, descriptive
+passive, implicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+passive, explicit, descriptive
+active_negative, implicit, descriptive
+not_applicable
+not_applicable
+active_positive_other, explicit, ideal
+active_positive_other, implicit, descriptive
+not_applicable
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, implicit, ideal
+passive, explicit, descriptive
+active_positive_other, explicit, descriptive
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_negative, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_positive_caring, implicit, ideal
+active_positive_other, explicit, descriptive
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+active_positive_other, implicit, descriptive
+passive, explicit, descriptive
+not_applicable
+active_negative, implicit, descriptive
+not_applicable
+passive, explicit, descriptive
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, implicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, implicit, descriptive
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+active_positive_other, implicit, ideal
+active_positive_challenging, explicit, descriptive
+active_positive_other, explicit, descriptive
+passive, explicit, descriptive
+passive, implicit, descriptive
+not_applicable
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_negative, implicit, descriptive
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+passive, explicit, descriptive
+active_positive_caring, explicit, ideal
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+passive, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, explicit, descriptive
+passive, explicit, descriptive
+not_applicable
+active_negative, explicit, descriptive
+not_applicable
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_negative, explicit, descriptive
+not_applicable
+active_positive_other, explicit, descriptive
+active_negative, explicit, descriptive
+passive, explicit, descriptive
+active_negative, explicit, descriptive
+active_positive_other, implicit, descriptive
+active_positive_other, explicit, ideal
+not_applicable
+passive, implicit, descriptive
+passive, explicit, descriptive
+passive, implicit, descriptive
+active_negative, implicit, descriptive
+active_positive_caring, explicit, ideal
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+passive, explicit, descriptive
+active_negative, implicit, descriptive
+not_applicable
+passive, explicit, descriptive
+active_positive_other, explicit, ideal
+active_positive_other, explicit, descriptive

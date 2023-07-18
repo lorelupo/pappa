@@ -1,0 +1,45 @@
+Retrieving predictions...
+Counter({'PASSIVE': 144, 'ACTIVE_POS_OTHER': 79, 'NA': 59, 'ACTIVE_NEG': 34, 'ACTIVE_POS_CARING': 29, 'ACTIVE_POS_CHALLENGING': 5})
+Evaluating predicitons...
+  prompt        prediction         gold_elin         gold_lena        gold_oscar          gold_agg
+0   None                NA           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+1   None                NA           PASSIVE                NA                NA                NA
+2   None           PASSIVE  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER           PASSIVE  ACTIVE_POS_OTHER
+3   None  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER  ACTIVE_POS_OTHER
+4   None           PASSIVE           PASSIVE           PASSIVE           PASSIVE           PASSIVE
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   48.68   49.93   67.28   44.20         49.30
+lena    48.68  100.00   53.37   75.09   49.98         51.02
+oscar   49.93   53.37  100.00   78.19   52.61         51.65
+agg     67.28   75.09   78.19  100.00   56.24         73.52
+model   44.20   49.98   52.61   56.24  100.00         48.93
+
+Annotators' mean kappa: 56.37
+Model's mean kappa: 50.75
+Diff in mean kappa: 5.62
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   60.86   61.71   74.86   57.14         61.29
+lena    60.86  100.00   66.86   81.71   63.71         63.86
+oscar   61.71   66.86  100.00   84.00   65.71         64.29
+agg     74.86   81.71   84.00  100.00   67.43         80.19
+model   57.14   63.71   65.71   67.43  100.00         62.19
+
+Annotators' mean accuracy: 67.40
+Model's mean accuracy: 63.50
+Diff in mean accuracy: 3.90
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   57.28   57.15   68.85   51.16         57.22
+lena    57.28  100.00   57.93   77.13   54.18         57.60
+oscar   57.15   57.93  100.00   81.33   58.14         57.54
+agg     68.85   77.13   81.33  100.00   58.15         75.77
+model   51.16   54.18   58.14   58.15  100.00         54.49
+
+Annotators' mean F1: 62.03
+Model's mean F1: 55.41
+Diff in mean F1: 6.63
+
