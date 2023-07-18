@@ -85,6 +85,8 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
     instruction_name = instruction.split("/")[-1].split(".")[0]
     output_base_dir = f'{output_dir}/{instruction_name}_{model_name_short}'
     output_dir = incremental_path(output_base_dir) if not evaluation_only else output_base_dir
+    print('---'*10)
+    print(f'Working on {output_dir}')
     with CopyStdoutToFile(os.path.join(output_dir, 'log.txt')):
 
         # Print the command used to run the script
@@ -152,6 +154,8 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
         df_kappa.to_csv(os.path.join(output_dir, f'kap_dim.tsv'), sep="\t", index=True)
         df_accuracy.to_csv(os.path.join(output_dir, f'acc_dim.tsv'), sep="\t", index=True)
         df_f1.to_csv(os.path.join(output_dir, f'f1_dim.tsv'), sep="\t", index=True)
+
+        print()
 
 if __name__ == "__main__":
     fire.Fire(main)

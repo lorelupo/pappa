@@ -1,5 +1,6 @@
 import openai
 import backoff
+from dotenv import load_dotenv
 import os
 import pandas as pd
 import collections 
@@ -89,7 +90,6 @@ class LMClassifier:
 
     def evaluate_predictions(self, df, gold_labels):
 
-
         # Add the gold labels to df
         if isinstance(gold_labels, pd.DataFrame):
             for col in gold_labels.columns:
@@ -99,6 +99,7 @@ class LMClassifier:
         else:
             raise ValueError('The gold labels must be either a list or a DataFrame.')
         
+        print("Evaluating predicitons...")
         print(df.head())
         
         # define gold_labels method variable
@@ -185,7 +186,10 @@ class GPTClassifier(LMClassifier):
             gold_labels (Union[pd.DataFrame, List[str]]): Gold labels corresponding to the input texts.
         """
         super().__init__(input_texts, labels_dict, gold_labels)
-        openai.api_key = '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'    
+
+        # load environment variables
+        load_dotenv('.env')
+        openai.api_key = os.getenv("OPENAI_API_KEY")
 
     def generate_predictions(self, instruction, output_prompt, model_name, max_len_model, default_label):
         """

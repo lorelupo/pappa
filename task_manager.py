@@ -127,10 +127,8 @@ class TaskManager:
             Tuple: Tuple containing input texts (List[str]) and gold labels (Pandas DataFrame).
         """
         # Read the xlsx data file to table
-        df = pd.read_csv(path_data, sep=';')
+        df = pd.read_csv(path_data, sep=';').fillna('NA')
         # Read text and labels
         input_texts = [text[:-1] + '.' if not text.endswith('.') else text for text in df['text_clean'].tolist()]
         gold_labels = df[['elin', 'lena', 'oscar', 'agg']]
-        # Rename columns adding a prefix
-        gold_labels = gold_labels.add_prefix('gold_')
         return input_texts, gold_labels
