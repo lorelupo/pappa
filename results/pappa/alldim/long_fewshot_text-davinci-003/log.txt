@@ -657,3 +657,183 @@ Annotators' mean F1: 64.62
 Model's mean F1: 62.47
 Diff in mean F1: 2.16
 
+Retrieving predictions...
+Counter({'EXPLICIT': 228, 'IMPLICIT': 76, 'NA': 46})
+Evaluating predicitons...
+  prompt prediction gold_elin gold_lena gold_oscar  gold_agg
+0   None   EXPLICIT  EXPLICIT  EXPLICIT   EXPLICIT  EXPLICIT
+1   None         NA  EXPLICIT        NA         NA        NA
+2   None   IMPLICIT  IMPLICIT  EXPLICIT   EXPLICIT  IMPLICIT
+3   None   EXPLICIT  EXPLICIT  EXPLICIT   EXPLICIT  EXPLICIT
+4   None   EXPLICIT  EXPLICIT  EXPLICIT   EXPLICIT  EXPLICIT
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   23.55   29.94   94.76   21.74         26.74
+lena    23.55  100.00   29.56   31.08   31.34         26.55
+oscar   29.94   29.56  100.00   36.24   24.64         29.75
+agg     94.76   31.08   36.24  100.00   24.65         54.03
+model   21.74   31.34   24.64   24.65  100.00         25.91
+
+Annotators' mean kappa: 34.27
+Model's mean kappa: 25.59
+Diff in mean kappa: 8.68
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   54.00   55.71   96.57   51.71         54.86
+lena    54.00  100.00   62.57   57.43   67.71         58.29
+oscar   55.71   62.57  100.00   59.14   58.00         59.14
+agg     96.57   57.43   59.14  100.00   52.57         71.05
+model   51.71   67.71   58.00   52.57  100.00         59.14
+
+Annotators' mean accuracy: 60.83
+Model's mean accuracy: 57.50
+Diff in mean accuracy: 3.33
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   46.40   53.85   96.51   46.49         50.13
+lena    46.40  100.00   50.81   51.68   52.46         48.61
+oscar   53.85   50.81  100.00   57.94   51.26         52.33
+agg     96.51   51.68   57.94  100.00   48.20         68.71
+model   46.49   52.46   51.26   48.20  100.00         50.07
+
+Annotators' mean F1: 54.95
+Model's mean F1: 49.60
+Diff in mean F1: 5.34
+
+Retrieving predictions...
+Counter({'DESCRIPTIVE': 242, 'IDEAL': 62, 'NA': 46})
+Evaluating predicitons...
+  prompt   prediction    gold_elin    gold_lena   gold_oscar gold_agg
+0   None  DESCRIPTIVE        IDEAL        IDEAL  DESCRIPTIVE    IDEAL
+1   None           NA  DESCRIPTIVE           NA           NA       NA
+2   None  DESCRIPTIVE        IDEAL  DESCRIPTIVE  DESCRIPTIVE    IDEAL
+3   None        IDEAL        IDEAL        IDEAL        IDEAL    IDEAL
+4   None  DESCRIPTIVE        IDEAL  DESCRIPTIVE  DESCRIPTIVE    IDEAL
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   34.47   48.82   97.26   40.09         41.64
+lena    34.47  100.00   39.52   38.31   36.40         37.00
+oscar   48.82   39.52  100.00   52.40   49.07         44.17
+agg     97.26   38.31   52.40  100.00   40.91         62.66
+model   40.09   36.40   49.07   40.91  100.00         41.85
+
+Annotators' mean kappa: 46.37
+Model's mean kappa: 41.62
+Diff in mean kappa: 4.75
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   62.57   70.57   98.29   65.43         66.57
+lena    62.57  100.00   71.71   64.29   70.29         67.14
+oscar   70.57   71.71  100.00   72.29   75.71         71.14
+agg     98.29   64.29   72.29  100.00   65.43         78.29
+model   65.43   70.29   75.71   65.43  100.00         70.48
+
+Annotators' mean accuracy: 70.79
+Model's mean accuracy: 69.21
+Diff in mean accuracy: 1.57
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   56.57   67.09   98.25   61.16         61.83
+lena    56.57  100.00   59.31   58.93   59.82         57.94
+oscar   67.09   59.31  100.00   69.40   67.04         63.20
+agg     98.25   58.93   69.40  100.00   61.84         75.53
+model   61.16   59.82   67.04   61.84  100.00         62.67
+
+Annotators' mean F1: 64.62
+Model's mean F1: 62.47
+Diff in mean F1: 2.16
+
+Retrieving predictions...
+Counter({'EXPLICIT': 228, 'IMPLICIT': 76, 'NA': 46})
+Evaluating predicitons...
+  prompt prediction gold_elin gold_lena gold_oscar  gold_agg
+0   None   EXPLICIT  EXPLICIT  EXPLICIT   EXPLICIT  EXPLICIT
+1   None         NA  EXPLICIT        NA         NA        NA
+2   None   IMPLICIT  IMPLICIT  EXPLICIT   EXPLICIT  IMPLICIT
+3   None   EXPLICIT  EXPLICIT  EXPLICIT   EXPLICIT  EXPLICIT
+4   None   EXPLICIT  EXPLICIT  EXPLICIT   EXPLICIT  EXPLICIT
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   23.55   29.94   94.76   21.74         26.74
+lena    23.55  100.00   29.56   31.08   31.34         26.55
+oscar   29.94   29.56  100.00   36.24   24.64         29.75
+agg     94.76   31.08   36.24  100.00   24.65         54.03
+model   21.74   31.34   24.64   24.65  100.00         25.91
+
+Annotators' mean kappa: 34.27
+Model's mean kappa: 25.59
+Diff in mean kappa: 8.68
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   54.00   55.71   96.57   51.71         54.86
+lena    54.00  100.00   62.57   57.43   67.71         58.29
+oscar   55.71   62.57  100.00   59.14   58.00         59.14
+agg     96.57   57.43   59.14  100.00   52.57         71.05
+model   51.71   67.71   58.00   52.57  100.00         59.14
+
+Annotators' mean accuracy: 60.83
+Model's mean accuracy: 57.50
+Diff in mean accuracy: 3.33
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   46.40   53.85   96.51   46.49         50.13
+lena    46.40  100.00   50.81   51.68   52.46         48.61
+oscar   53.85   50.81  100.00   57.94   51.26         52.33
+agg     96.51   51.68   57.94  100.00   48.20         68.71
+model   46.49   52.46   51.26   48.20  100.00         50.07
+
+Annotators' mean F1: 54.95
+Model's mean F1: 49.60
+Diff in mean F1: 5.34
+
+Retrieving predictions...
+Counter({'DESCRIPTIVE': 242, 'IDEAL': 62, 'NA': 46})
+Evaluating predicitons...
+  prompt   prediction    gold_elin    gold_lena   gold_oscar gold_agg
+0   None  DESCRIPTIVE        IDEAL        IDEAL  DESCRIPTIVE    IDEAL
+1   None           NA  DESCRIPTIVE           NA           NA       NA
+2   None  DESCRIPTIVE        IDEAL  DESCRIPTIVE  DESCRIPTIVE    IDEAL
+3   None        IDEAL        IDEAL        IDEAL        IDEAL    IDEAL
+4   None  DESCRIPTIVE        IDEAL  DESCRIPTIVE  DESCRIPTIVE    IDEAL
+KAPPA:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   34.47   48.82   97.26   40.09         41.64
+lena    34.47  100.00   39.52   38.31   36.40         37.00
+oscar   48.82   39.52  100.00   52.40   49.07         44.17
+agg     97.26   38.31   52.40  100.00   40.91         62.66
+model   40.09   36.40   49.07   40.91  100.00         41.85
+
+Annotators' mean kappa: 46.37
+Model's mean kappa: 41.62
+Diff in mean kappa: 4.75
+
+ACCURACY:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   62.57   70.57   98.29   65.43         66.57
+lena    62.57  100.00   71.71   64.29   70.29         67.14
+oscar   70.57   71.71  100.00   72.29   75.71         71.14
+agg     98.29   64.29   72.29  100.00   65.43         78.29
+model   65.43   70.29   75.71   65.43  100.00         70.48
+
+Annotators' mean accuracy: 70.79
+Model's mean accuracy: 69.21
+Diff in mean accuracy: 1.57
+
+F1:
+         elin    lena   oscar     agg   model  mean_non_agg
+elin   100.00   56.57   67.09   98.25   61.16         61.83
+lena    56.57  100.00   59.31   58.93   59.82         57.94
+oscar   67.09   59.31  100.00   69.40   67.04         63.20
+agg     98.25   58.93   69.40  100.00   61.84         75.53
+model   61.16   59.82   67.04   61.84  100.00         62.67
+
+Annotators' mean F1: 64.62
+Model's mean F1: 62.47
+Diff in mean F1: 2.16
+

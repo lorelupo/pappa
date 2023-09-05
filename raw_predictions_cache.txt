@@ -1,0 +1,39 @@
+0	passive, explicit, descriptive
+1	not_applicable
+2	passive, implicit, descriptive
+3	active_positive_other, explicit, ideal
+4	passive, explicit, descriptive
+5	active_positive_other, explicit, descriptive
+6	not_applicable
+7	active_positive_challenging, explicit, ideal
+8	not_applicable
+9	passive, explicit, descriptive
+10	active_negative, explicit, descriptive
+11	passive, explicit, descriptive
+12	active_negative, explicit, descriptive
+13	active_positive_other, explicit, ideal
+14	passive, explicit, descriptive
+15	not_applicable
+16	not_applicable
+18	passive, explicit, descriptive
+19	passive, explicit, descriptive
+20	passive, explicit, descriptive
+21	passive, implicit, descriptive
+22	active_positive_caring, explicit, ideal
+23	not_applicable
+24	active_negative, explicit, descriptive
+25	not_applicable
+26	passive, explicit, descriptive
+27	passive, explicit, descriptive
+28	passive, explicit, descriptive
+29	passive, explicit, descriptive
+31	active_positive_other, explicit, descriptive
+32	active_positive_caring, explicit, descriptive
+33	active_positive_other, implicit, descriptive
+34	active_positive_other, explicit, ideal
+35	not_applicable
+36	active_positive_other, explicit, descriptive
+37	passive, implicit, descriptive
+39	not_applicable
+41	not_applicable
+42	active_positive_other, explicit, ideal

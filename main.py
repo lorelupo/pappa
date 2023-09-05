@@ -151,10 +151,10 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
         df_kappa, df_accuracy, df_f1 = classifier.evaluate_predictions(df=df_predicted_labels, gold_labels=gold_labels)
 
         # Save results
-        df_predicted_labels.to_csv(os.path.join(output_dir, f'pre_dim.tsv'), sep="\t", index=True)
-        df_kappa.to_csv(os.path.join(output_dir, f'kap_dim.tsv'), sep="\t", index=True)
-        df_accuracy.to_csv(os.path.join(output_dir, f'acc_dim.tsv'), sep="\t", index=True)
-        df_f1.to_csv(os.path.join(output_dir, f'f1_dim.tsv'), sep="\t", index=True)
+        df_predicted_labels.to_csv(os.path.join(output_dir, f'pred_dim3.tsv'), sep="\t", index=True)
+        df_kappa.to_csv(os.path.join(output_dir, f'kap_dim3.tsv'), sep="\t", index=True)
+        df_accuracy.to_csv(os.path.join(output_dir, f'acc_dim3.tsv'), sep="\t", index=True)
+        df_f1.to_csv(os.path.join(output_dir, f'f1_dim3.tsv'), sep="\t", index=True)
 
         print()
 

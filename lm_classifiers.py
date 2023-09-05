@@ -2,6 +2,7 @@ import openai
 import backoff
 from dotenv import load_dotenv
 import os
+import time
 import pandas as pd
 import collections 
 import torch
@@ -101,7 +102,7 @@ class LMClassifier:
         else:
             raise ValueError('The gold labels must be either a list or a DataFrame.')
         
-        print("Evaluating predicitons...")
+        print("Evaluating predictions...")
         print(df.head())
         
         # define gold_labels method variable
@@ -260,6 +261,11 @@ class GPTClassifier(LMClassifier):
                     )
                     # Extract the predicted label from the output
                     predicted_label = gpt_out['choices'][0]['message']['content'].strip()
+                    # Save predicted label to file, together with the index of the prompt
+                    with open('raw_predictions_cache.txt', 'a') as f:
+                        f.write(f'{i}\t{predicted_label}\n')
+                    # Sleep for 25 seconds
+                    # time.sleep(10)
                 # Generate predictions using the OpenAI API
                 else:
                     gpt_out = completions_with_backoff(
@@ -277,7 +283,7 @@ class GPTClassifier(LMClassifier):
                 print(f'Error in generating prediction for prompt n.{i}: {e}')
                 # select a random label from the list of labels
                 predicted_label = default_label
-                print(f'Selected default label: {predicted_label}')
+                print(f'Selected default label "{predicted_label}" for prompt n.{i}.')
 
             # Add the predicted label to the list of predictionss
             predictions.append(predicted_label)
