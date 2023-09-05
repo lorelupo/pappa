@@ -51,10 +51,13 @@ python main.py \
 import sys
 import os
 import argparse
-from utils import CopyStdoutToFile, incremental_path
+import fire
+from utils import incremental_path, setup_logging
+from logging import getLogger
+logger = getLogger(__name__)
+
 from lm_classifiers import HFClassifier, GPTClassifier
 from task_manager import TaskManager
-import fire
 
 OPENAI_MODELS = [
     "gpt-4",
@@ -86,77 +89,70 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
     instruction_name = "/".join(instruction.split("/")[1:]).split(".")[0] # remove "instruction/"" and ".txt" from the instruction path
     output_base_dir = f"{output_dir}/{instruction_name}_{model_name_short}"
     output_dir = incremental_path(output_base_dir) if not evaluation_only else output_base_dir
-    print('---'*10)
-    print(f'Working on {output_dir}')
-    with CopyStdoutToFile(os.path.join(output_dir, 'log.txt')):
 
-        # Print the command used to run the script
-        # print(sys.argv[0], "\\")
-        # for key, value in locals().items():
-        #     print(f"--{key} {value} \\")
-        # print("")
+    setup_logging(os.path.basename(__file__).split('.')[0], output_dir)
 
-        # Define task and load data
-        tm = TaskManager(task)
-        input_texts, gold_labels = tm.read_data(data_file)
+    logger.info(f'Working on {output_dir}')
 
-        if model_name in OPENAI_MODELS:
-            # Define classifier
-            classifier = GPTClassifier(input_texts, tm.labels, tm.label_dims)
+    # Define task and load data
+    tm = TaskManager(task)
+    input_texts, gold_labels = tm.read_data(data_file)
 
-            if not evaluation_only:
-                # Generate raw predictions
-                prompts, predictions = classifier.generate_predictions(
-                    instruction=instruction,
-                    output_prompt=output_prompt,
-                    model_name=model_name,
-                    max_len_model=max_len_model,
-                    default_label=tm.default_label
-                    )
-                
-                # Save raw predictions
-                with open(os.path.join(output_dir, 'raw_predictions.txt'), 'w') as f:
-                    for prediction in predictions:
-                        f.write(prediction + "\n")
+    if model_name in OPENAI_MODELS:
+        # Define classifier
+        classifier = GPTClassifier(input_texts, tm.labels, tm.label_dims)
+
+        if not evaluation_only:
+            # Generate raw predictions
+            prompts, predictions = classifier.generate_predictions(
+                instruction=instruction,
+                output_prompt=output_prompt,
+                model_name=model_name,
+                max_len_model=max_len_model,
+                default_label=tm.default_label
+                )
             
-            if evaluation_only:
-                # Load raw predictions
-                with open(os.path.join(output_dir, 'raw_predictions.txt'), 'r') as f:
-                    predictions = f.read().splitlines()
-                prompts = None
-                
-            df_predicted_labels = classifier.retrieve_predicted_labels(
-                predictions=predictions,
-                default_label=tm.default_label,
-                prompts=prompts,
-                only_dim=only_dim
+            # Save raw predictions
+            with open(os.path.join(output_dir, 'raw_predictions.txt'), 'w') as f:
+                for prediction in predictions:
+                    f.write(prediction + "\n")
+        
+        if evaluation_only:
+            # Load raw predictions
+            with open(os.path.join(output_dir, 'raw_predictions.txt'), 'r') as f:
+                predictions = f.read().splitlines()
+            prompts = None
+            
+        df_predicted_labels = classifier.retrieve_predicted_labels(
+            predictions=predictions,
+            default_label=tm.default_label,
+            prompts=prompts,
+            only_dim=only_dim
+            )
+
+    else:
+        # Define classifier
+        classifier = HFClassifier(input_texts, tm.labels, tm.label_dims)
+
+        if not evaluation_only:
+            # Generate predictions
+            df_predicted_labels = classifier.generate_predictions(
+                instruction=instruction,
+                output_prompt=output_prompt,
+                model_name=model_name,
+                cache_dir=cache_dir,
+                max_len_model=max_len_model,
+                default_label=tm.default_label
                 )
 
-        else:
-            # Define classifier
-            classifier = HFClassifier(input_texts, tm.labels, tm.label_dims)
+    # Evaluate predictions
+    df_kappa, df_accuracy, df_f1 = classifier.evaluate_predictions(df=df_predicted_labels, gold_labels=gold_labels)
 
-            if not evaluation_only:
-                # Generate predictions
-                df_predicted_labels = classifier.generate_predictions(
-                    instruction=instruction,
-                    output_prompt=output_prompt,
-                    model_name=model_name,
-                    cache_dir=cache_dir,
-                    max_len_model=max_len_model,
-                    default_label=tm.default_label
-                    )
-
-        # Evaluate predictions
-        df_kappa, df_accuracy, df_f1 = classifier.evaluate_predictions(df=df_predicted_labels, gold_labels=gold_labels)
-
-        # Save results
-        df_predicted_labels.to_csv(os.path.join(output_dir, f'pred_dim3.tsv'), sep="\t", index=True)
-        df_kappa.to_csv(os.path.join(output_dir, f'kap_dim3.tsv'), sep="\t", index=True)
-        df_accuracy.to_csv(os.path.join(output_dir, f'acc_dim3.tsv'), sep="\t", index=True)
-        df_f1.to_csv(os.path.join(output_dir, f'f1_dim3.tsv'), sep="\t", index=True)
-
-        print()
+    # Save results
+    df_predicted_labels.to_csv(os.path.join(output_dir, f'pred_dim3.tsv'), sep="\t", index=True)
+    df_kappa.to_csv(os.path.join(output_dir, f'kap_dim3.tsv'), sep="\t", index=True)
+    df_accuracy.to_csv(os.path.join(output_dir, f'acc_dim3.tsv'), sep="\t", index=True)
+    df_f1.to_csv(os.path.join(output_dir, f'f1_dim3.tsv'), sep="\t", index=True)
 
 if __name__ == "__main__":
     fire.Fire(main)

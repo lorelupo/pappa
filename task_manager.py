@@ -7,7 +7,7 @@ class TaskManager:
     for an LLM classifier.
     """
 
-    def __init__(self, task_file):
+    def __init__(self, task_file, logdir=None):
 
         # define dictionary of data-reading functions
         self.data_reading_functions = {

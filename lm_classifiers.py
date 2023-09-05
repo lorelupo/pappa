@@ -7,11 +7,13 @@ import pandas as pd
 import collections 
 import torch
 import datetime
+from utils import setup_logging
+from logging import getLogger, StreamHandler
+logger = getLogger(__name__)
+logger_backoff = getLogger('backoff').addHandler(StreamHandler())
+
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score
-
-import logging
-logging.getLogger('backoff').addHandler(logging.StreamHandler())
 
 AVG_TOKENS_PER_WORD_EN = 4/3 # according to: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
 AVG_TOKENS_PER_WORD_NONEN = 5 # adjust according to the language of the input text
@@ -28,7 +30,9 @@ def chat_completions_with_backoff(**kwargs):
     return openai.ChatCompletion.create(**kwargs)  
 
 class LMClassifier:
-    def __init__(self, input_texts, labels_dict, label_dims):
+    def __init__(self, input_texts, labels_dict, label_dims, output_dir=None):
+
+        setup_logging(os.path.basename(__file__).split('.')[0], output_dir)
 
         self.input_texts = input_texts
         self.labels_dict = labels_dict
@@ -51,15 +55,15 @@ class LMClassifier:
         predicted_labels = []
         if self.label_dims == 1:
             # retrieve a single label for each prediction since a single classification task is performed at a time
-            print("Retrieving predictions...")
+            logger.info("Retrieving predictions...")
             for prediction in predictions:
                 labels_in_prediction = [self.labels_dict.get(label) for label in self.labels_dict.keys() if label in prediction]
                 predicted_labels.append(labels_in_prediction[0]) if len(labels_in_prediction) > 0 else predicted_labels.append(self.labels_dict.get(default_label))
             # Count the number of predictions of each type and print the result
-            print(collections.Counter(predicted_labels))
+            logger.info(collections.Counter(predicted_labels))
         else:
             # retrieve multiple labels for each prediction since multiple classification tasks are performed at a time
-            print(f"Retrieving predictions for {self.label_dims} dimensions...")
+            logger.info(f"Retrieving predictions for {self.label_dims} dimensions...")
             for prediction in predictions:
                 labels_in_prediction = []
                 for dim in self.labels_dict.keys():
@@ -71,7 +75,7 @@ class LMClassifier:
                     labels_in_prediction.append(dim_label)                                            
                 predicted_labels.append(labels_in_prediction)
             # Count the number of predictions of each type and print the result
-            print(collections.Counter([",".join(labels) for labels in predicted_labels]))
+            logger.info(collections.Counter([",".join(labels) for labels in predicted_labels]))
         
         # Add the data to the DataFrame
         if self.label_dims == 1:
@@ -79,10 +83,10 @@ class LMClassifier:
         elif self.label_dims > 1:
             if only_dim is not None:
                 # retrieve only the predictions for a specific dimension
-                print(f"Retrieved predictions for dimension {only_dim}")
+                logger.info(f"Retrieved predictions for dimension {only_dim}")
                 df = pd.DataFrame({'prompt': prompts, 'prediction': pd.DataFrame(predicted_labels).to_numpy()[:,only_dim]})
             else:
-                print("Retrieved predictions for all dimensions")
+                logger.info("Retrieved predictions for all dimensions")
                 df = pd.DataFrame(predicted_labels).fillna(default_label)
                 # rename columns to prediction_n
                 df.columns = [f"prediction_dim{i}" for i in range(1, len(df.columns)+1)]
@@ -102,8 +106,8 @@ class LMClassifier:
         else:
             raise ValueError('The gold labels must be either a list or a DataFrame.')
         
-        print("Evaluating predictions...")
-        print(df.head())
+        logger.info("Evaluating predictions...")
+        logger.info(df.head())
         
         # define gold_labels method variable
         gold_labels = df.filter(regex='^gold', axis=1)
@@ -154,29 +158,27 @@ class LMClassifier:
                 df_f1.mean_non_agg[name] = (df_f1[non_agg_names].loc[name].sum() - 1.0) / (len(non_agg_names) - 1.0)
         
         # print info
-        print('KAPPA:')
-        print(df_kappa.round(4)*100)
-        print()
+        logger.info('KAPPA:')
+        logger.info(f"{df_kappa.round(4)*100}\n")
         if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean kappa: {100*df_kappa.mean_non_agg[:-1].mean():.2f}")
-            print(f"Model's mean kappa: {100*df_kappa.model[:-1].mean():.2f}")
-            print(f'Diff in mean kappa: {100*(df_kappa.mean_non_agg[:-1].mean() - df_kappa.model[:-1].mean()):.2f}')
-        print()
-        print('ACCURACY:')
-        print(df_accuracy.round(4)*100)
-        print()
+            logger.info(f"Annotators' mean kappa: {100*df_kappa.mean_non_agg[:-1].mean():.2f}")
+            logger.info(f"Model's mean kappa: {100*df_kappa.model[:-1].mean():.2f}")
+            logger.info(f'Diff in mean kappa: {100*(df_kappa.mean_non_agg[:-1].mean() - df_kappa.model[:-1].mean()):.2f}', "\n")
+
+        logger.info('ACCURACY:')
+        logger.info(f"{df_accuracy.round(4)*100}\n")
         if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean accuracy: {100*df_accuracy.mean_non_agg[:-1].mean():.2f}") 
-            print(f"Model's mean accuracy: {100*df_accuracy.model[:-1].mean():.2f}")
-            print(f'Diff in mean accuracy: {100*(df_accuracy.mean_non_agg[:-1].mean() - df_accuracy.model[:-1].mean()):.2f}')
-        print()
-        print('F1:')
-        print(df_f1.round(4)*100)
-        print()
+            logger.info(f"Annotators' mean accuracy: {100*df_accuracy.mean_non_agg[:-1].mean():.2f}") 
+            logger.info(f"Model's mean accuracy: {100*df_accuracy.model[:-1].mean():.2f}")
+            logger.info(f'Diff in mean accuracy: {100*(df_accuracy.mean_non_agg[:-1].mean() - df_accuracy.model[:-1].mean()):.2f}\n')
+
+        logger.info('F1:')
+        logger.info(df_f1.round(4)*100, "\n")
+
         if len(gold_labels.columns) > 1:
-            print(f"Annotators' mean F1: {100*df_f1.mean_non_agg[:-1].mean():.2f}")
-            print(f"Model's mean F1: {100*df_f1.model[:-1].mean():.2f}")
-            print(f'Diff in mean F1: {100*(df_f1.mean_non_agg[:-1].mean() - df_f1.model[:-1].mean()):.2f}')
+            logger.info(f"Annotators' mean F1: {100*df_f1.mean_non_agg[:-1].mean():.2f}")
+            logger.info(f"Model's mean F1: {100*df_f1.model[:-1].mean():.2f}")
+            logger.info(f'Diff in mean F1: {100*(df_f1.mean_non_agg[:-1].mean() - df_f1.model[:-1].mean()):.2f}')
 
         return df_kappa, df_accuracy, df_f1
 
@@ -226,7 +228,7 @@ class GPTClassifier(LMClassifier):
 
             # Formulate the prompt
             prompt = f'{instruction} {input_text} {output}'
-            print(prompt) if i == 0 else None
+            logger.info(prompt) if i == 0 else None
             # if prompt is longer then max_len_model, remove words from the imput text
             len_prompt = int(len(prompt.split())*AVG_TOKENS_PER_WORD_AVG)
             if len_prompt > max_len_model:
@@ -235,11 +237,11 @@ class GPTClassifier(LMClassifier):
                 input_text = ' '.join(input_text)
                 prompt = f'{instruction} {input_text} {output}'
                 # print detailed info about the above operation
-                print(f'Prompt n.{i} was too long, so we removed words from it. Approx original length: {len_prompt}, approx new length: {int(len(prompt.split())*AVG_TOKENS_PER_WORD_AVG)}')
+                logger.info(f'Prompt n.{i} was too long, so we removed words from it. Approx original length: {len_prompt}, approx new length: {int(len(prompt.split())*AVG_TOKENS_PER_WORD_AVG)}')
 
             # Print progress every 100 sentences
             if (i+1) % 20 == 0:
-                print(f"Processed {i+1} sentences")
+                logger.info(f"Processed {i+1} sentences")
 
             # Add the prompt to the list of prompts
             prompts.append(prompt)
@@ -280,16 +282,16 @@ class GPTClassifier(LMClassifier):
                     # Extract the predicted label from the output
                     predicted_label = gpt_out['choices'][0]['text'].strip()
             except Exception as e:
-                print(f'Error in generating prediction for prompt n.{i}: {e}')
+                logger.error(f'Error in generating prediction for prompt n.{i}: {e}')
                 # select a random label from the list of labels
                 predicted_label = default_label
-                print(f'Selected default label "{predicted_label}" for prompt n.{i}.')
+                logger.warning(f'Selected default label "{predicted_label}" for prompt n.{i}.')
 
             # Add the predicted label to the list of predictionss
             predictions.append(predicted_label)
 
         # Count the number of predictions of each type and print the result
-        print(collections.Counter(predictions))
+        logger.info(collections.Counter(predictions))
 
         return prompts, predictions
 
@@ -322,7 +324,7 @@ class HFClassifier(LMClassifier):
         # Set device
         # device = torch.device('cuda:1' if torch.cuda.device_count() >= 2 else 'cuda:0' if torch.cuda.is_available() else 'cpu')
         device = 'GPU' if torch.cuda.is_available() else 'CPU'
-        print(f'Running on {device} device...')
+        logger.info(f'Running on {device} device...')
 
         tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
         model = AutoModelForSeq2SeqLM.from_pretrained(model_name, torch_dtype="auto", device_map="auto", cache_dir=cache_dir)
@@ -338,12 +340,12 @@ class HFClassifier(LMClassifier):
 
         # Encode the labels
         encoded_labels = tokenizer(list(self.labels_dict.keys()), padding=True, truncation=True, return_tensors="pt")['input_ids']
-        print(f'Encoded labels: \n{encoded_labels}')
+        logger.info(f'Encoded labels: \n{encoded_labels}')
         # Retrieve the tokens associated to encoded labels and print them
         # decoded_labels = tokenizer.batch_decode(encoded_labels)
         # print(f'Decoded labels: \n{decoded_labels}')
         max_len = max(encoded_labels.shape[1:])
-        print(f'Maximum length of the encoded labels: {max_len}')
+        logger.info(f'Maximum length of the encoded labels: {max_len}')
 
         time = []
         # Generate predictions and prompts for each input text
@@ -353,11 +355,11 @@ class HFClassifier(LMClassifier):
 
             # Formulate the prompt
             prompt = f'{instruction} {input_text} {output}'
-            print(prompt) if i == 0 else None
+            logger.info(prompt) if i == 0 else None
 
             # Print progress every 100 sentences
             if (i+1) % 100 == 0:
-                print(f"Processed {i+1} sentences")
+                logger.info(f"Processed {i+1} sentences")
 
             # Add the prompt to the list of prompts
             prompts.append(prompt)
@@ -371,7 +373,7 @@ class HFClassifier(LMClassifier):
                 # If inputs is longer then max_len_model, remove tokens from the encoded instruction
                 len_inputs = inputs['input_ids'].shape[1]
                 if len_inputs > max_len_model:
-                    print(f'Input text length: {len_inputs}. Input will be truncated to {max_len_model} tokens.')
+                    logger.info(f'Input text length: {len_inputs}. Input will be truncated to {max_len_model} tokens.')
                     # get the number of tokens to remove from the encoded instruction
                     len_remove = len_inputs - max_len_model
                     # get the length of the output
@@ -395,7 +397,7 @@ class HFClassifier(LMClassifier):
         torch.inference_mode(False)
 
         # Count the number of predictions of each type and print the result
-        print(collections.Counter(predictions))
+        logger.info(collections.Counter(predictions))
 
         # Lowercase the predictions
         predictions =  list(map(str.lower,predictions))
@@ -405,7 +407,7 @@ class HFClassifier(LMClassifier):
         predictions = [self.labels_dict.get(word) for word in predictions]
         
         # Count the number of predictions of each type and print the result
-        print(collections.Counter(predictions))
+        logger.info(collections.Counter(predictions))
 
         # Add the data to the DataFrame
         df = pd.DataFrame({'time': time, 'prompt': prompts, 'prediction': predictions})
