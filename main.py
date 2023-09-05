@@ -134,7 +134,7 @@ def main(data_file, task, instruction, output_prompt, model_name, max_len_model,
 
         else:
             # Define classifier
-            classifier = HFClassifier(input_texts, tm.labels)
+            classifier = HFClassifier(input_texts, tm.labels, tm.label_dims)
 
             if not evaluation_only:
                 # Generate predictions

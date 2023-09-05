@@ -1,0 +1,11 @@
+{
+    "labels": {
+        "not_applicable": "NA",
+        "passive": "PASSIVE",
+        "active_negative": "ACTIVE_NEG",
+        "active_positive_challenging": "ACTIVE_POS_CHALLENGING",
+        "active_positive_caring": "ACTIVE_POS_CARING",
+        "active_positive_other": "ACTIVE_POS_OTHER"
+        },
+    "read_function": "gne"
+}

@@ -1,5 +1,5 @@
+import json
 import pandas as pd
-
 
 class TaskManager:
     """
@@ -7,115 +7,27 @@ class TaskManager:
     for an LLM classifier.
     """
 
-    def __init__(self, task):
- 
-        self.task_dict = {
-            'pappa_all': {
-                'label_dims': 3,
-                'labels': {
-                    'dim1': {
-                        'not_applicable': 'NA',
-                        'passive': 'PASSIVE',
-                        'active_negative': 'ACTIVE_NEG',
-                        'active_positive_challenging': 'ACTIVE_POS_CHALLENGING',
-                        'active_positive_caring': 'ACTIVE_POS_CARING',
-                        'active_positive_other': 'ACTIVE_POS_OTHER',
-                    },
-                    'dim2': {
-                        'not_applicable': 'NA',
-                        'explicit': 'EXPLICIT',
-                        'implicit': 'IMPLICIT',
-                    },
-                    'dim3': {
-                        'not_applicable': 'NA',
-                        'descriptive': 'DESCRIPTIVE',
-                        'ideal': 'IDEAL'
-                    },
-                },
-                'read_function': self.read_data_pappa,
-            },
-            'pappa_all_together': {
-                'label_dims': 1,
-                'labels': {
-                    'not_applicable': 'NA',
-                    'passive': 'PASSIVE',
-                    'active_negative': 'ACTIVE_NEG',
-                    'active_positive_challenging': 'ACTIVE_POS_CHALLENGING',
-                    'active_positive_caring': 'ACTIVE_POS_CARING',
-                    'active_positive_other': 'ACTIVE_POS_OTHER',
-                    'explicit': 'EXPLICIT',
-                    'implicit': 'IMPLICIT',
-                    'descriptive': 'DESCRIPTIVE',
-                    'ideal': 'IDEAL'
-                    },
-                'read_function': self.read_data_pappa,
-            },
-            'pappa_dim1': {
-                'label_dims': 1,
-                'labels': {
-                    'not_applicable': 'NA',
-                    'passive': 'PASSIVE',
-                    'active_negative': 'ACTIVE_NEG',
-                    'active_positive_challenging': 'ACTIVE_POS_CHALLENGING',
-                    'active_positive_caring': 'ACTIVE_POS_CARING',
-                    'active_positive_other': 'ACTIVE_POS_OTHER'
-                    },
-                'read_function': self.read_data_pappa,
-            },
-            'pappa_dim1_reduced': {
-                'label_dims': 1,
-                'labels': {'not_applicable': 'NA',
-                           'passive': 'PASSIVE',
-                           'active_negative': 'ACTIVE_NEG',
-                           'active_positive': 'ACTIVE_POS'},
-                'read_function': self.read_data_pappa,
-            },
-            'pappa_dim1_binary': {
-                'label_dims': 1,
-                'labels': {
-                    'not_applicable': 'NA',
-                    'passive': 'PAS',
-                    'active': 'POS'
-                    },
-                'read_function': self.read_data_pappa,
-            },
-            'pappa_dim1_dirk': {
-                'label_dims': 1,
-                'labels': {
-                    'NA': 'NA',
-                    'PASSIVE': 'PASSIVE',
-                    'ACTIVE_NEG': 'ACTIVE_NEG',
-                    'ACTIVE_POS_CHALLENGING': 'ACTIVE_POS_CHALLENGING',
-                    'ACTIVE_POS_CARING': 'ACTIVE_POS_CARING',
-                    'ACTIVE_POS_OTHER': 'ACTIVE_POS_OTHER'
-                    },
-                'read_function': self.read_data_pappa,
-            },
-            'pappa_dim2': {
-                'label_dims': 1,
-                'labels': {
-                    'not_applicable': 'NA',
-                    'explicit': 'EXPLICIT',
-                    'implicit': 'IMPLICIT'
-                    },
-                'read_function': self.read_data_pappa,
-            },
-            'pappa_dim3': {
-                'label_dims': 1,
-                'labels': {
-                    'not_applicable': 'NA',
-                    'descriptive': 'DESCRIPTIVE',
-                    'ideal': 'IDEAL'
-                    },
-                'read_function': self.read_data_pappa,
-            },             
+    def __init__(self, task_file):
+
+        # define dictionary of data-reading functions
+        self.data_reading_functions = {
+            "pappa": self.read_data_pappa,
         }
-        self.task = self.task_dict[task]
-        self.label_dims = self.task['label_dims']
+
+        # read task specs from json task_file
+        self.task = json.load(open(task_file, 'r'))
+        # setup labels
         self.labels = self.task['labels']
-        # select the first label in the dictionary as default
+        self.label_dims = self.task['label_dims'] if 'label_dims' in self.task else 1
         self.default_label = list(self.labels.keys())[0] if self.label_dims == 1 else list(self.labels['dim1'].keys())[0]
-        self.read_data = self.task['read_function']
+        # setup data reading function
+        if self.task['read_function'] in self.data_reading_functions:
+            self.read_data = self.data_reading_functions[self.task['read_function']]
+        else:
+            raise ValueError(
+                f"Data-reading function '{self.task['read_function']}' not supported."
+                f"Supported functions: {self.data_reading_functions.keys()}"
+                )
 
     @staticmethod
     def read_data_pappa(path_data):

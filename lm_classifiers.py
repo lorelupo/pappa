@@ -181,14 +181,14 @@ class LMClassifier:
         return df_kappa, df_accuracy, df_f1
 
 class GPTClassifier(LMClassifier):
-    def __init__(self, input_texts, labels_dict, gold_labels):
+    def __init__(self, input_texts, labels_dict, label_dims):
         """
         Args:
             input_texts (List[str]): List of input texts to generate predictions for.
             labels_dict (Dict[str, int]): Dictionary mapping label names to label IDs.
-            gold_labels (Union[pd.DataFrame, List[str]]): Gold labels corresponding to the input texts.
+            label_dims (int): Number of label dimensions.
         """
-        super().__init__(input_texts, labels_dict, gold_labels)
+        super().__init__(input_texts, labels_dict, label_dims)
 
         self.system_role = GPT_SYSTEM_ROLE
 
@@ -295,14 +295,14 @@ class GPTClassifier(LMClassifier):
 
 class HFClassifier(LMClassifier):
 
-    def __init__(self, input_texts, labels_dict, gold_labels):
+    def __init__(self, input_texts, labels_dict, label_dims):
         """
         Args:
             input_texts (List[str]): List of input texts to generate predictions for.
             labels_dict (Dict[str, int]): Dictionary mapping label names to label IDs.
-            gold_labels (Union[pd.DataFrame, List[str]]): Gold labels corresponding to the input texts.
+            label_dims (int): Number of label dimensions.
         """
-        super().__init__(input_texts, labels_dict, gold_labels)
+        super().__init__(input_texts, labels_dict, label_dims)
 
     def generate_predictions(self, instruction, output_prompt, model_name, cache_dir, max_len_model, default_label):
         """
