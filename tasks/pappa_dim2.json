@@ -1,8 +1,0 @@
-{
-    "labels": {
-        "not_applicable": "NA",
-        "explicit": "EXPLICIT",
-        "implicit": "IMPLICIT"
-        },
-    "read_function": "pappa"
-}

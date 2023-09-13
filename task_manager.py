@@ -31,18 +31,16 @@ class TaskManager:
 
     @staticmethod
     def read_data_pappa(path_data):
-        """
-        Read data from a file and extract input texts and gold labels for the 'user_gender_noname' task.
-
-        Args:
-            path_data (str): Path to the data file.
-
-        Returns:
-            Tuple: Tuple containing input texts (List[str]) and gold labels (Pandas DataFrame).
-        """
-        # Read the xlsx data file to table
-        df = pd.read_csv(path_data, sep=';').fillna('NA')
-        # Read text and labels
+        # Read the csv/xlsx data file to table
+        if path_data.endswith('.csv'):
+            df = pd.read_csv(path_data, sep=';').fillna('NA')
+        elif path_data.endswith('.xlsx'):
+            df = pd.read_excel(path_data).fillna('NA')
+        # Read texts
         input_texts = [text[:-1] + '.' if not text.endswith('.') else text for text in df['text_clean'].tolist()]
-        gold_labels = df[['elin', 'lena', 'oscar', 'agg']]
+        # Read gold labels if any
+        if 'elin' in df.columns:
+            gold_labels = df[['elin', 'lena', 'oscar', 'agg']]
+        else:
+            gold_labels = None
         return input_texts, gold_labels

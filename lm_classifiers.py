@@ -6,7 +6,6 @@ import time
 import pandas as pd
 import collections 
 import torch
-import datetime
 from utils import setup_logging
 from logging import getLogger, StreamHandler
 logger = getLogger(__name__)
@@ -27,7 +26,7 @@ class LMClassifier:
             max_len_model,
             output_dir=None):
 
-        setup_logging(os.path.basename(__file__).split('.')[0], output_dir) if output_dir is not None else None
+        setup_logging(os.path.basename(__file__).split('.')[0], logger, output_dir) if output_dir is not None else None
 
         self.labels_dict = labels_dict
         # check the dimensionality of the labels:
@@ -39,13 +38,10 @@ class LMClassifier:
         
         # Define the instruction and ending ending string for prompt formulation
         # If instruction is a path to a file, read the file, else use the instruction as is
-        self.instruction = open(instruction_file, 'r').read() if os.path.isfile(instruction_file) else instruction_file
+        self.instruction = open(instruction_file, 'r').read()
         self.prompt_suffix = prompt_suffix.replace('\\n', '\n')
 
         self.max_len_model = max_len_model
-        
-
-        
         self.model_name = model_name
 
     def generate_predictions(self):
@@ -225,15 +221,15 @@ class GPTClassifier(LMClassifier):
         load_dotenv('.env')
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
-        @staticmethod
-        @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
-        def completions_with_backoff(**kwargs):
-            return openai.Completion.create(**kwargs) 
+    @staticmethod
+    @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
+    def completions_with_backoff(**kwargs):
+        return openai.Completion.create(**kwargs) 
 
-        @staticmethod
-        @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
-        def chat_completions_with_backoff(**kwargs):
-            return openai.ChatCompletion.create(**kwargs) 
+    @staticmethod
+    @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
+    def chat_completions_with_backoff(**kwargs):
+        return openai.ChatCompletion.create(**kwargs) 
 
     def generate_predictions(
             self,
@@ -263,8 +259,8 @@ class GPTClassifier(LMClassifier):
 
                 # print detailed info about the above operation
                 logger.info(
-                    f'Prompt n.{i} was too long, so we removed words from it.'
-                    f'Approx original length: {len_prompt};'
+                    f'Prompt n.{i} was too long, so we removed words from it. '
+                    f'Approx original length: {len_prompt}; '
                     f'Approx new length: {int(len(prompt.split())*self.avg_tokens_per_word_avg)}'
                     )
 

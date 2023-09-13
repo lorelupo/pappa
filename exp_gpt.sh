@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# model_name=text-davinci-003
-model_name=gpt-4
+model_name=text-davinci-003
+# model_name=gpt-4
 max_len_model=4097
 # max_len_model=4097
 
@@ -35,13 +35,12 @@ max_len_model=4097
 for instruction in  pappa/alldim/long_fewshot
 do
     python main.py \
-    --data_file data/human_annotation/dim3.csv \
-    --instruction instructions/$instruction.txt \
-    --output_prompt "\\nLabel: " \
+    --data_file data/F_sample_clean_after1993.xlsx \
+    --task_file tasks/pappa/all.json \
+    --instruction_file instructions/$instruction.txt \
+    --prompt_suffix "\\nLabel: " \
     --model_name $model_name \
     --max_len_model $max_len_model \
-    --task pappa_dim3 \
     --output_dir tmp \
-    --evaluation_only \
-    --only_dim 2
+    --sleep_after_step 0
 done

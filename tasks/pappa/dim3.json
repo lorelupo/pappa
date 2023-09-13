@@ -1,0 +1,8 @@
+{
+    "labels": {
+        "not_applicable": "NA",
+        "descriptive": "DESCRIPTIVE",
+        "ideal": "IDEAL"
+        },
+    "read_function": "pappa"
+}

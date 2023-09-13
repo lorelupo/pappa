@@ -37,3 +37,110 @@
 39	not_applicable
 41	not_applicable
 42	active_positive_other, explicit, ideal
+0	Instructions/pappa_all_long_fewshot.txt
+
+Title: Discussing the
+1	Instructions for calculating fees based on the child's registration:
+
+Table 0:
+2	Oroväckande forskning visar att många av de barn
+3	Instructions for increasing parental leave uptake among fathers, encouraging mothers to take less leave
+4	Motivering för att behålla den nuvarande ordningen för fast
+5	In this case, a mother took her son from France to Portugal after the
+6	The given text appears to be in Swedish and contains information about the social policies
+7	The instructions are suggesting various ways to promote reading among fathers and new parents.
+8	Det första stycket i instruktionerna säger att det som
+9	Explanation of the differences can be that young women more often have children with slightly
+10	Motivering för bortförande av barn som genomförs av
+11	Other effect of the regulation regarding the right to parental leave days, as mentioned
+12	Contact information: 
+Name: Titti Mattson
+Email: titti
+13	Instructions
+
+1. Open the file "pappa_all_long_fewshot
+14	Explanation
+
+The instructions in the file "pappa_all_long_fewshot
+15	Instructions/pappa_all_long_fewshot.txt: Investigate the visitation
+16	The label for the given text is not provided. Please provide the label for
+17	Negative
+18	Instructions for pappa_all_long_fewshot.txt:
+1. The maintenance
+19	The label for the given text is not provided.
+0	passive, explicit, descriptive
+1	not_applicable
+2	passive, explicit, descriptive
+3	active_positive_other, explicit, ideal
+4	passive, explicit, descriptive
+5	not_applicable
+6	not_applicable
+7	active_positive_challenging, explicit, ideal
+8	passive, explicit, descriptive
+9	passive, explicit, descriptive
+10	active_negative, explicit, descriptive
+0	passive, explicit, descriptive
+1	not_applicable
+2	passive, explicit, descriptive
+3	active_positive_other, explicit, ideal
+4	passive, explicit, descriptive
+5	not_applicable
+6	not_applicable
+7	active_positive_caring, explicit, ideal
+8	passive, explicit, descriptive
+9	passive, explicit, descriptive
+10	active_negative, explicit, descriptive
+11	not_applicable
+12	active_negative, explicit, descriptive
+13	active_positive_other, explicit, descriptive
+14	passive, explicit, descriptive
+15	not_applicable
+16	active_positive_other, explicit, descriptive
+17	active_negative, explicit, descriptive
+18	passive, explicit, descriptive
+19	not_applicable
+0	passive, explicit, descriptive
+1	passive, explicit, descriptive
+2	active_positive_other, explicit, ideal
+3	active_positive_other, explicit, ideal
+4	active_positive_other, explicit, ideal
+0	passive, explicit, descriptive
+1	passive, explicit, descriptive
+2	active_positive_other, explicit, ideal
+3	active_positive_other, explicit, ideal
+4	active_positive_other, explicit, ideal
+5	passive, implicit, descriptive
+6	active_positive_other, explicit, ideal
+7	active_positive_other, explicit, ideal
+8	active_positive_other, explicit, ideal
+9	passive, explicit, descriptive
+10	passive, explicit, descriptive
+11	passive, explicit, descriptive
+12	passive, explicit, descriptive
+13	active_positive_other, explicit, ideal
+14	passive, explicit, descriptive
+15	active_positive_other, explicit, ideal
+16	passive, explicit, descriptive
+17	passive, explicit, descriptive
+18	not_applicable
+19	passive, explicit, descriptive
+0	not_applicable
+1	not_applicable
+2	not_applicable
+3	active_positive_other
+4	not_applicable
+5	not_applicable
+6	not_applicable
+7	active_positive_caring
+8	not_applicable
+9	not_applicable
+10	active_negative
+11	not_applicable
+12	not_applicable
+13	not_applicable
+14	not_applicable
+15	not_applicable
+16	not_applicable
+17	active_negative
+18	not_applicable
+19	not_applicable

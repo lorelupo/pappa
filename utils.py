@@ -1,7 +1,19 @@
-import traceback
 import sys
 import os
 import logging
+import threading
+from logging import (
+    CRITICAL,  # NOQA
+    DEBUG,  # NOQA
+    ERROR,  # NOQA
+    FATAL,  # NOQA
+    INFO,  # NOQA
+    NOTSET,  # NOQA
+    WARN,  # NOQA
+    WARNING,  # NOQA
+)
+from typing import Optional
+
 
 def incremental_path(path):
     """
@@ -29,55 +41,46 @@ def incremental_path(path):
 
     return path
 
-def setup_logging(module_name:str, logdir:str=None, verbose:str=True):
-    """
-    Setup logging to console and file.
-    """
-    # activate logging
-    logging.basicConfig(
-        level=logging.INFO if verbose else logging.WARNING,
-        format="%(asctime)s [%(module)s] %(message)s",
-        datefmt='%Y-%m-%d %H:%M:%S',
-        handlers=[
-            logging.StreamHandler()
-        ]
-    )
+def setup_logging(module_name:str, logger:logging.Logger, logdir:str=None, verbose:str=True):
+
+    # Set the logger's level
+    logger.setLevel(logging.INFO if verbose else logging.WARNING)
+
+    # Create a formatter
+    formatter = logging.Formatter("%(asctime)s [%(module)s] %(message)s", datefmt='%Y-%m-%d %H:%M:%S')
+
+    # Create handlers
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    handlers = [console_handler]
+
     if logdir is not None:
-            logging.basicConfig(
-                handlers=[
-                    logging.StreamHandler(),
-                    logging.FileHandler(os.path.join(logdir, f'{module_name}.log'), mode='w')
-                ]
-        )
-    else:
-        logging.basicConfig(
-            handlers=[
-                logging.StreamHandler()
-            ]
-        )
+        file_handler = logging.FileHandler(os.path.join(logdir, f'{module_name}.log'), mode='w')
+        file_handler.setFormatter(formatter)
+        handlers.append(file_handler)
 
-# Context manager that copies stdout and any exceptions to a log file
-class CopyStdoutToFile(object):
-    """
-    Context manager to copy stdout to a file.
-    """
-    def __init__(self, filename):
-        self.file = open(filename, 'a')
-        self.stdout = sys.stdout
+    # Set the handlers for the logger
+    logger.handlers = handlers
 
-    def __enter__(self):
-        sys.stdout = self
-
-    def __exit__(self, exc_type, exc_value, tb):
-        sys.stdout = self.stdout
-        if exc_type is not None:
-            self.file.write(traceback.format_exc())
-        self.file.close()
-
-    def write(self, data):
-        self.file.write(data)
-        self.stdout.write(data)
-
-    def flush(self):
-        self.file.flush()
-        self.stdout.flush()
+    # # activate logging
+    # logging.basicConfig(
+    #     level=logging.INFO if verbose else logging.WARNING,
+    #     format="%(asctime)s [%(module)s] %(message)s",
+    #     datefmt='%Y-%m-%d %H:%M:%S',
+    #     handlers=[
+    #         logging.StreamHandler()
+    #     ]
+    # )
+    # if logdir is not None:
+    #         logging.basicConfig(
+    #             handlers=[
+    #                 logging.StreamHandler(),
+    #                 logging.FileHandler(os.path.join(logdir, f'{module_name}.log'), mode='w')
+    #             ]
+    #     )
+    # else:
+    #     logging.basicConfig(
+    #         handlers=[
+    #             logging.StreamHandler()
+    #         ]
+    #     )

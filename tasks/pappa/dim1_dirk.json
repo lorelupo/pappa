@@ -1,0 +1,12 @@
+{
+    "label_dims": 1,
+    "labels": {
+        "NA": "NA",
+        "PASSIVE": "PASSIVE",
+        "ACTIVE_NEG": "ACTIVE_NEG",
+        "ACTIVE_POS_CHALLENGING": "ACTIVE_POS_CHALLENGING",
+        "ACTIVE_POS_CARING": "ACTIVE_POS_CARING",
+        "ACTIVE_POS_OTHER": "ACTIVE_POS_OTHER"
+        },
+    "read_function": "pappa"
+},
