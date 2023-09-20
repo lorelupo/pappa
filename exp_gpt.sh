@@ -37,7 +37,7 @@ do
     python main.py \
     --data_file data/F_sample_clean_after1993.xlsx \
     --task_file tasks/pappa/all.json \
-    --instruction_file instructions/$instruction.txt \
+    --instruction instructions/$instruction.txt \
     --prompt_suffix "\\nLabel: " \
     --model_name $model_name \
     --max_len_model $max_len_model \

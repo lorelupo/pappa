@@ -9,7 +9,7 @@ Example usage:
 
 python main.py \
     --data_file data/human_annotation/dim1_test.csv \
-    --instruction_file instructions/pappa/dim1/nodesc_zeroshot.txt \
+    --instruction instructions/pappa/dim1/nodesc_zeroshot.txt \
     --task_file tasks/pappa/dim1.json \
     --prompt_suffix "\\nLabel:" \
     --model_name google/flan-t5-small \
@@ -21,9 +21,12 @@ python main.py \
 
 import os
 import fire
+
+import pandas as pd 
+
 from utils import incremental_path, setup_logging
 
-from lm_classifiers import HFClassifier, GPTClassifier
+from lm_classifiers import HFClassifier, GPTClassifier, LMClassifier
 from task_manager import TaskManager
 
 from logging import getLogger
@@ -54,7 +57,7 @@ OPENAI_MODELS = [
 def classify_and_evaluate(
         data_file,
         task_file,
-        instruction_file,
+        instruction,
         prompt_suffix,
         model_name,
         max_len_model,
@@ -64,17 +67,23 @@ def classify_and_evaluate(
         only_dim=None,
         gpt_system_role="You are a helpful assistant.",
         sleep_after_step=0,
-        aggregated_gold_name="agg"
+        aggregated_gold_name="agg",
+        log_to_file=True,
+        raw_predictions_good=False,
         ):
 
     # Duplicate the output to stdout and a log file
     # strip points and slashes from the model name
     model_name_short = model_name.split("/")[-1].replace(".", "") # remove "username/" in case of HF models
-    instruction_name = "/".join(instruction_file.split("/")[1:]).split(".")[0] # remove "instruction/"" and ".txt" from the instruction path
+    # if instruction is a path, remove the path and the extension
+    if "/" in instruction:
+        instruction_name = "/".join(instruction.split("/")[1:]).split(".")[0] # remove "instruction/"" and ".txt" from the instruction path
+    else:
+        instruction_name = instruction.split(" ")[0]
     output_base_dir = f"{output_dir}/{instruction_name}_{model_name_short}"
     output_dir = incremental_path(output_base_dir) if not evaluation_only else output_base_dir
 
-    setup_logging(os.path.basename(__file__).split('.')[0], logger, output_dir)
+    setup_logging(os.path.basename(__file__).split('.')[0], logger, output_dir if log_to_file else None)
 
     logger.info(f'Working on {output_dir}')
 
@@ -83,30 +92,43 @@ def classify_and_evaluate(
     input_texts, gold_labels = tm.read_data(data_file)
 
     # Define classifier
-    if model_name in OPENAI_MODELS:
-        classifier = GPTClassifier(
+    if evaluation_only:
+        classifier = LMClassifier(
             labels_dict=tm.labels,
             label_dims=tm.label_dims,
             default_label=tm.default_label,
-            instruction_file=instruction_file,
+            instruction=instruction,
             prompt_suffix=prompt_suffix,
             model_name=model_name,
             max_len_model=max_len_model,
             output_dir=output_dir,
-            gpt_system_role=gpt_system_role
+            log_to_file=log_to_file,
             )
-
+    elif model_name in OPENAI_MODELS:
+            classifier = GPTClassifier(
+                labels_dict=tm.labels,
+                label_dims=tm.label_dims,
+                default_label=tm.default_label,
+                instruction=instruction,
+                prompt_suffix=prompt_suffix,
+                model_name=model_name,
+                max_len_model=max_len_model,
+                output_dir=output_dir,
+                gpt_system_role=gpt_system_role,
+                log_to_file=log_to_file,
+                )
     else:
         classifier = HFClassifier(
             labels_dict=tm.labels,
             label_dims=tm.label_dims,
             default_label=tm.default_label,
-            instruction_file=instruction_file,
+            instruction=instruction,
             prompt_suffix=prompt_suffix,
             model_name=model_name,
             max_len_model=max_len_model,
             output_dir=output_dir,
-            cache_dir=cache_dir
+            cache_dir=cache_dir,
+            log_to_file=log_to_file,
             )
 
     if evaluation_only:
@@ -132,12 +154,16 @@ def classify_and_evaluate(
     if gold_labels is not None:
         logger.info(f'Gold labels found. Evaluating predictions.')
 
-        # Retrieve predicted labels from raw predictions
-        df_predicted_labels = classifier.retrieve_predicted_labels(
-            predictions=predictions,
-            prompts=prompts,
-            only_dim=only_dim
-            )
+        # If raw predictions are not yet final labels convert them
+        if not raw_predictions_good:
+            df_predicted_labels = classifier.retrieve_predicted_labels(
+                predictions=predictions,
+                prompts=prompts,
+                only_dim=only_dim
+                )
+        else:
+            # just create a df from the raw predictions
+            df_predicted_labels = pd.DataFrame(predictions, columns=['prediction'])
 
         # Evaluate predictions
         df_kappa, df_accuracy, df_f1 = classifier.evaluate_predictions(
@@ -147,10 +173,10 @@ def classify_and_evaluate(
             )
 
         # Save results
-        df_predicted_labels.to_csv(os.path.join(output_dir, f'pred_dim3.tsv'), sep="\t", index=True)
-        df_kappa.to_csv(os.path.join(output_dir, f'kap_dim3.tsv'), sep="\t", index=True)
-        df_accuracy.to_csv(os.path.join(output_dir, f'acc_dim3.tsv'), sep="\t", index=True)
-        df_f1.to_csv(os.path.join(output_dir, f'f1_dim3.tsv'), sep="\t", index=True)
+        df_predicted_labels.to_csv(os.path.join(output_dir, f'pred.tsv'), sep="\t", index=True)
+        df_kappa.to_csv(os.path.join(output_dir, f'kap.tsv'), sep="\t", index=True)
+        df_accuracy.to_csv(os.path.join(output_dir, f'acc.tsv'), sep="\t", index=True)
+        df_f1.to_csv(os.path.join(output_dir, f'f1.tsv'), sep="\t", index=True)
     
     logger.info(f'Done!')
 

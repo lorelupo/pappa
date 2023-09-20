@@ -20,13 +20,15 @@ class LMClassifier:
             labels_dict,
             label_dims,
             default_label,
-            instruction_file,
+            instruction,
             prompt_suffix,
             model_name,
             max_len_model,
-            output_dir=None):
+            output_dir=None,
+            log_to_file=True
+            ):
 
-        setup_logging(os.path.basename(__file__).split('.')[0], logger, output_dir) if output_dir is not None else None
+        setup_logging(os.path.basename(__file__).split('.')[0], logger, output_dir if log_to_file else None)
 
         self.labels_dict = labels_dict
         # check the dimensionality of the labels:
@@ -38,7 +40,7 @@ class LMClassifier:
         
         # Define the instruction and ending ending string for prompt formulation
         # If instruction is a path to a file, read the file, else use the instruction as is
-        self.instruction = open(instruction_file, 'r').read()
+        self.instruction = open(instruction, 'r').read() if os.path.isfile(instruction) else instruction
         self.prompt_suffix = prompt_suffix.replace('\\n', '\n')
 
         self.max_len_model = max_len_model
@@ -193,14 +195,14 @@ class GPTClassifier(LMClassifier):
             labels_dict,
             label_dims,
             default_label,
-            instruction_file,
+            instruction,
             prompt_suffix,
             model_name,
             max_len_model,
-            output_dir=None,
-            gpt_system_role="You are a helpful assistant."
+            gpt_system_role="You are a helpful assistant.",
+            **kwargs,
             ):
-        super().__init__(labels_dict, label_dims, default_label, instruction_file, prompt_suffix, model_name, max_len_model, output_dir)    
+        super().__init__(labels_dict, label_dims, default_label, instruction, prompt_suffix, model_name, max_len_model, **kwargs)  
         
         # set the average number of tokens per word in order to compute the max length of the input text
         self.avg_tokens_per_en_word = 4/3 # according to: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
@@ -332,15 +334,16 @@ class HFClassifier(LMClassifier):
             labels_dict,
             label_dims,
             default_label,
-            instruction_file,
+            instruction,
             prompt_suffix,
             model_name,
             max_len_model,
             output_dir=None,
-            cache_dir=None
+            cache_dir=None,
+            **kwargs,
             ):
                 
-        super().__init__(labels_dict, label_dims, default_label, instruction_file, prompt_suffix, model_name, max_len_model, output_dir)
+        super().__init__(labels_dict, label_dims, default_label, instruction, prompt_suffix, model_name, max_len_model, output_dir, **kwargs)
 
         # Set device
         self.device = 'GPU' if torch.cuda.is_available() else 'CPU'
