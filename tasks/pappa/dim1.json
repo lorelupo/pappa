@@ -7,5 +7,6 @@
         "active_positive_caring": "ACTIVE_POS_CARING",
         "active_positive_other": "ACTIVE_POS_OTHER"
         },
-    "read_function": "pappa"
+    "default_label": "not_applicable",
+    "read_function": "read_data"
 }

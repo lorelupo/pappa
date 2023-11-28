@@ -15,7 +15,7 @@ from logging import (
 from typing import Optional
 
 
-def incremental_path(path):
+def incremental_path(path, select_last=False):
     """
     Create a directory or file with an incremental number if a directory or file with the same name already exists.
     """
@@ -31,13 +31,16 @@ def incremental_path(path):
     while os.path.exists(path):
         path = f'{base_path}_{increment}{extension}'
         increment += 1
-
-    # Create the directory or file
-    if is_file:
-        with open(path, 'w'):
-            pass
+    
+    if select_last:
+        path = f'{base_path}_{increment-2}{extension}'
     else:
-        os.makedirs(path)
+        # Create the directory or file
+        if is_file:
+            with open(path, 'w'):
+                pass
+        else:
+            os.makedirs(path)
 
     return path
 
@@ -61,26 +64,3 @@ def setup_logging(module_name:str, logger:logging.Logger, logdir:str=None, verbo
 
     # Set the handlers for the logger
     logger.handlers = handlers
-
-    # # activate logging
-    # logging.basicConfig(
-    #     level=logging.INFO if verbose else logging.WARNING,
-    #     format="%(asctime)s [%(module)s] %(message)s",
-    #     datefmt='%Y-%m-%d %H:%M:%S',
-    #     handlers=[
-    #         logging.StreamHandler()
-    #     ]
-    # )
-    # if logdir is not None:
-    #         logging.basicConfig(
-    #             handlers=[
-    #                 logging.StreamHandler(),
-    #                 logging.FileHandler(os.path.join(logdir, f'{module_name}.log'), mode='w')
-    #             ]
-    #     )
-    # else:
-    #     logging.basicConfig(
-    #         handlers=[
-    #             logging.StreamHandler()
-    #         ]
-    #     )

@@ -1,34 +1,10 @@
-'''
-This code exploits large language models (LLMs) as annotators.
-Given an annotation task defined by a set of input texts, a set of possible labels,
-and an instruction for the LLM, the code generates a prompt matching the input text and the instruction,
-and uses an LLM to generate a label prediction for text. 
-The text annotations produced by the LLM are then evaluated against the gold labels using accuracy and the Cohen's kappa metric.
-
-Example usage:
-
-python main.py \
-    --data_file data/human_annotation/dim1_test.csv \
-    --instruction instructions/pappa/dim1/nodesc_zeroshot.txt \
-    --task_file tasks/pappa/dim1.json \
-    --prompt_suffix "\\nLabel:" \
-    --model_name google/flan-t5-small \
-    --max_len_model 512 \
-    --output_dir tmp \
-    --cache_dir ~/.cache/huggingface/hub/ \
-    --evaluation_only False
-'''
-
 import os
 import fire
-
 import pandas as pd 
-
 from utils import incremental_path, setup_logging
-
-from lm_classifiers import HFClassifier, GPTClassifier, LMClassifier
 from task_manager import TaskManager
-
+from classifiers import HFLMClassifier, GPTClassifier, LMClassifier
+from evaluate import evaluate_predictions
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -54,7 +30,7 @@ OPENAI_MODELS = [
     "curie-codex",
 ]
 
-def classify_and_evaluate(
+def annotate_and_evaluate(
         data_file,
         task_file,
         instruction,
@@ -72,6 +48,29 @@ def classify_and_evaluate(
         raw_predictions_good=False,
         ):
 
+    """
+    Params:
+        data_file: path to the data file
+        task_file: path to the task file
+        instruction: path to the instruction file
+        prompt_suffix: suffix to add to the prompt
+        model_name: name of the model to use (for HuggingFace models, use the full name, e.g. "username/model_name")
+        max_len_model: maximum input length of the model
+        output_dir: path to the output directory
+        cache_dir: path to the cache directory, where to store/load the HF model
+        evaluation_only: if True, only evaluate the predictions that are already present in the output_dir
+        only_dim: if not None, only evaluate the predictions for the given dimension
+        gpt_system_role: if model_name is an OpenAI model, this is the role of the system in the conversation
+        sleep_after_step: if model_name is an OpenAI model, this is the number of seconds to sleep after each step (might be useful in case of API limits)
+        aggregated_gold_name: name of the aggregated gold label, if any
+        log_to_file: if True, log to a file in the output_dir
+        raw_predictions_good: if True, the raw predictions are already formatted as the final labels and thus don't need to be further processed
+    Output:
+        raw_predictions.txt: txt file with the raw predictions
+        predictions.csv: csv file with the predictions and the probabilities for each class
+        *.log: log files with the logs from the predictions process and the evaluation of the predictions
+    """
+
     # Duplicate the output to stdout and a log file
     # strip points and slashes from the model name
     model_name_short = model_name.split("/")[-1].replace(".", "") # remove "username/" in case of HF models
@@ -81,7 +80,7 @@ def classify_and_evaluate(
     else:
         instruction_name = instruction.split(" ")[0]
     output_base_dir = f"{output_dir}/{instruction_name}_{model_name_short}"
-    output_dir = incremental_path(output_base_dir) if not evaluation_only else output_base_dir
+    output_dir = incremental_path(output_base_dir, select_last=evaluation_only)
 
     setup_logging(os.path.basename(__file__).split('.')[0], logger, output_dir if log_to_file else None)
 
@@ -89,6 +88,7 @@ def classify_and_evaluate(
 
     # Define task and load data
     tm = TaskManager(task_file)
+    logger.info(f'Loading data...')
     input_texts, gold_labels = tm.read_data(data_file)
 
     # Define classifier
@@ -118,7 +118,7 @@ def classify_and_evaluate(
                 log_to_file=log_to_file,
                 )
     else:
-        classifier = HFClassifier(
+        classifier = HFLMClassifier(
             labels_dict=tm.labels,
             label_dims=tm.label_dims,
             default_label=tm.default_label,
@@ -132,14 +132,15 @@ def classify_and_evaluate(
             )
 
     if evaluation_only:
-        logger.info(f'Evaluation only. Loading raw predictions.')
+        logger.info(f'Evaluation only:')
         # Load raw predictions
+        logger.info(f'Loading raw predictions from: {os.path.join(output_dir, "raw_predictions.txt")}')
         with open(os.path.join(output_dir, 'raw_predictions.txt'), 'r') as f:
             predictions = f.read().splitlines()
         prompts = None
 
     else:
-        logger.info(f'Generating raw predictions.')
+        logger.info(f'Generating annotations:')
         # Generate raw predictions
         if model_name in OPENAI_MODELS:
             prompts, predictions = classifier.generate_predictions(input_texts, sleep_after_step=sleep_after_step)
@@ -166,19 +167,17 @@ def classify_and_evaluate(
             df_predicted_labels = pd.DataFrame(predictions, columns=['prediction'])
 
         # Evaluate predictions
-        df_kappa, df_accuracy, df_f1 = classifier.evaluate_predictions(
+        evaluate_predictions(
             df=df_predicted_labels,
             gold_labels=gold_labels,
             aggregated_gold_name=aggregated_gold_name
             )
 
         # Save results
-        df_predicted_labels.to_csv(os.path.join(output_dir, f'pred.tsv'), sep="\t", index=True)
-        df_kappa.to_csv(os.path.join(output_dir, f'kap.tsv'), sep="\t", index=True)
-        df_accuracy.to_csv(os.path.join(output_dir, f'acc.tsv'), sep="\t", index=True)
-        df_f1.to_csv(os.path.join(output_dir, f'f1.tsv'), sep="\t", index=True)
+        # Save results
+        df_predicted_labels.to_csv(os.path.join(output_dir, f'predictions.csv'))
     
     logger.info(f'Done!')
 
 if __name__ == "__main__":
-    fire.Fire(classify_and_evaluate)
+    fire.Fire(annotate_and_evaluate)

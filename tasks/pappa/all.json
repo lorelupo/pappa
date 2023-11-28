@@ -20,5 +20,6 @@
             "ideal": "IDEAL"
         }
     },
-    "read_function": "pappa"
+    "default_label": "not_applicable,not_applicable,not_applicable",
+    "read_function": "read_data"
 }

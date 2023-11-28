@@ -35,7 +35,7 @@ max_len_model=4097
 for instruction in  pappa/alldim/long_fewshot
 do
     python main.py \
-    --data_file data/F_sample_clean_after1993.xlsx \
+    --data_file data/pappa/F_sample_clean_after1993.xlsx \
     --task_file tasks/pappa/all.json \
     --instruction instructions/$instruction.txt \
     --prompt_suffix "\\nLabel: " \
