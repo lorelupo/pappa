@@ -1,6 +1,6 @@
 # Large Language Models for Text Coding
 
-Annotate your texts using large generative language models (LMs) from Hugging Face or OpenAI's API (GPT), following the methodology described in [How to Use Large Language Models for Text Coding: The Case of Fatherhood Roles in Public Policy Documents](https://arxiv.org/abs/2311.11844).
+Annotate your texts using large generative language models (LMs) from [Hugging Face](https://huggingface.co/models) or [OpenAI's API](https://openai.com/blog/openai-api) (GPT), following the methodology described in [How to Use Large Language Models for Text Coding: The Case of Fatherhood Roles in Public Policy Documents](https://arxiv.org/abs/2311.11844).
 
 ## Install
 
@@ -96,6 +96,35 @@ A classification task is defined by a `.json` file describing the dictionary of 
 In the labels dictionary, the keys are the labels in the format required to the LM, while the values are the labels as represented in your data. We make this distinction because different LMs might work more effectively with  different labels format. Defining the task in this way allows to flexibly tests different labels format by simply changing the dictionary keys and without modifying the dataset.
 
 The data-reading function needs to be defined in the [task_manager.py](task_manager.py). The current, basic data-reading function takes in input a tabular file where the texts to be annotated are under the column `text`, and the reference labels under one or more columns (if more than a reference label per text is available) containing the word `gold` in their name.
+
+### Models
+
+Supported language models are all generative models that are downloadable from [Hugging Face](https://huggingface.co/models) (e.g., [google/flan-t5-large](https://huggingface.co/google/flan-t5-large)) and the following OpenAI models: 
+
+```python
+OPENAI_MODELS = [
+    "gpt-4",
+    "gpt-4-0613",
+    "gpt-4-32k",
+    "gpt-4-32k-0613",
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-0613",
+    "gpt-3.5-turbo-16k-0613",
+    "code-davinci-002",
+    "text-davinci-003",
+    "text-davinci-002",
+    "text-davinci-001",
+    "text-davinci",
+    "text-curie-003",
+    "text-curie-002",
+    "text-curie-001",
+    "text-curie",
+    "davinci-codex",
+    "curie-codex",
+]*
+````
+\* this list can be easily expanded to new OpenAI models by simply adding them to it in the `main.py` file.
 
 ### OpenAI API key
 
