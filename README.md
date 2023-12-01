@@ -17,11 +17,11 @@ Example usage with GPT3.5:
 ```bash
 python main.py \
     --data_file data/pappa/human_annotation/dim1.csv \
-    --instruction instructions/pappa/dim1/short_zeroshot.txt \
+    --instruction instructions/pappa/dim1/long_fewshot.txt \
     --task_file tasks/pappa/dim1.json \
     --prompt_suffix "\\nLabel:" \
-    --model_name google/flan-t5-small \
-    --max_len_model 512 \
+    --model_name gpt-3.5-turbo \
+    --max_len_model 2048 \
     --output_dir tmp
 ```
 
@@ -30,13 +30,14 @@ Example usage with an open-source LM hosted on Hugging Face:
 ```bash
 python main.py \
     --data_file data/pappa/human_annotation/dim1.csv \
-    --instruction instructions/pappa/dim1/long_fewshot.txt \
+    --instruction instructions/pappa/dim1/short_zeroshot.txt \
     --task_file tasks/pappa/dim1.json \
     --prompt_suffix "\\nLabel:" \
-    --model_name gpt-3.5-turbo \
-    --max_len_model 2048 \
+    --model_name google/flan-t5-small \
+    --max_len_model 512 \
     --output_dir tmp
 ```
+
 ### Data file
 
 The supported data file formats are `.xlsx` (Excel), semicolon-separated `.csv`, and `.pkl`. The texts to be annotated should be listed under a column named `text`. 
@@ -52,7 +53,7 @@ Label the Swedish text according to how it describes the role of the father in t
 Possible labels are:
 </span>
 
-- <span style="color:blue">passive: fathers who are not actively involved in hands-on care and upbringing of the child;</span>
+- <$\textcolor{red}{\textsf{passive: fathers who are not actively involved in hands-on care and upbringing of the child;}}$
 - <span style="color:blue">active_negative: fathers exhibiting harmful behaviours like aggression, violence, or neglect;</span>
 - <span style="color:blue">active_positive_caring: fathers providing care, warmth, empathy, and support;</span>
 - <span style="color:blue">active_positive_challenging: fathers encouraging risk-taking, growth, and educational activities;</span>
