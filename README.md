@@ -5,8 +5,8 @@ Annotate your texts using large generative language models (LMs) from Hugging Fa
 ## Install
 
 ```
-git clone git@github.com:lorelupo/lm_for_annotation
-cd lm_for_annotation
+git clone git@github.com:lorelupo/pappa
+cd pappa
 pip install -r ./requirements.txt
 ```
 
