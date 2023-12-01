@@ -52,7 +52,7 @@ In our framework, the prompt consists of three elements: an instruction</span> (
 Label the Swedish text according to how it describes the role of the father in the family.
 Possible labels are:
 
-$\textcolor{blue}{\textsf{
+$\textcolor{red}{\textsf{
 - passive: fathers who are not actively involved in hands-on care and upbringing of the child;
 - active_negative: fathers exhibiting harmful behaviours like aggression, violence, or neglect;
 - active_positive_caring: fathers providing care, warmth, empathy, and support;
