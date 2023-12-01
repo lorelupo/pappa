@@ -53,7 +53,7 @@ Label the Swedish text according to how it describes the role of the father in t
 Possible labels are:
 </span>
 
-- <$\textcolor{red}{\textsf{passive: fathers who are not actively involved in hands-on care and upbringing of the child;}}$
+- $\textcolor{red}{\textsf{passive: fathers who are not actively involved in hands-on care and upbringing of the child;}}$
 - <span style="color:blue">active_negative: fathers exhibiting harmful behaviours like aggression, violence, or neglect;</span>
 - <span style="color:blue">active_positive_caring: fathers providing care, warmth, empathy, and support;</span>
 - <span style="color:blue">active_positive_challenging: fathers encouraging risk-taking, growth, and educational activities;</span>
