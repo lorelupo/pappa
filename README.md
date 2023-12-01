@@ -45,20 +45,21 @@ The supported data file formats are `.xlsx` (Excel), semicolon-separated `.csv`,
 ### Prompt
 
 When adequately prompted, a LM can annotate a text according to a given labelling scheme.
-In our framework, the prompt consists of three elements: an <span style="color:blue">instruction</span> (which can also contain an explanation of the available labels and some examples), a <span style="color:red">text</span> to be annotated, and a <span style="color:green">suffix</span>, to be appended after the text. For example:
+In our framework, the prompt consists of three elements: an instruction</span> (which can also contain an explanation of the available labels and some examples), a <span style="color:red">text</span> to be annotated, and a <span style="color:green">suffix</span>, to be appended after the text. For example:
 
 ---
-<span style="color:blue">
+
 Label the Swedish text according to how it describes the role of the father in the family.
 Possible labels are:
-</span>
 
-- $\textcolor{red}{\textsf{passive: fathers who are not actively involved in hands-on care and upbringing of the child;}}$
-- <span style="color:blue">active_negative: fathers exhibiting harmful behaviours like aggression, violence, or neglect;</span>
-- <span style="color:blue">active_positive_caring: fathers providing care, warmth, empathy, and support;</span>
-- <span style="color:blue">active_positive_challenging: fathers encouraging risk-taking, growth, and educational activities;</span>
-- <span style="color:blue">active_positive_other: fathers displaying competence, responsibility, trustworthiness, etc., without specifying a specific role;</span>
-- <span style="color:blue">not_applicable: not applicable.</span>
+$\textcolor{blue}{\textsf{
+- passive: fathers who are not actively involved in hands-on care and upbringing of the child;
+- active_negative: fathers exhibiting harmful behaviours like aggression, violence, or neglect;
+- active_positive_caring: fathers providing care, warmth, empathy, and support;
+- active_positive_challenging: fathers encouraging risk-taking, growth, and educational activities;
+- active_positive_other: fathers displaying competence, responsibility, trustworthiness, etc., without specifying a specific role;
+- not_applicable: not applicable.
+}}$
 
 
 <span style="color:red">
