@@ -57,13 +57,13 @@ Possible labels are:
 - $\textcolor{blue}{\textsf{active\\_negative: fathers exhibiting harmful behaviours like aggression, violence, or neglect;}}$
 - $\textcolor{blue}{\textsf{active\\_positive\\_caring: fathers providing care, warmth, empathy, and support;}}$
 - $\textcolor{blue}{\textsf{active\\_positive\\_challenging: fathers encouraging risk-taking, growth, and educational activities;}}$
-- $\textcolor{blue}{\textsf{active\\_positive\\_other: fathers displaying competence, responsibility, trustworthiness, etc., without specifying a specific role;}}$
+- $\textcolor{blue}{\textsf{active\\_positive\\_other: fathers displaying competence, responsibility, trustworthiness, etc.,}}$
+      $\textcolor{blue}{\textsf{without specifying a specific role;}}$
 - $\textcolor{blue}{\textsf{not\\_applicable: not applicable.}}$
 
 
-$\textcolor{red}{\textsf{
-Text: i båda fallen är modern genetisk mor till barnet .
-}}$
+
+$\textcolor{blue}{\textsf{Text:}}$ $\textcolor{red}{\textsf{i båda fallen är modern genetisk mor till barnet .}}$
 
 $\textcolor{green}{\textsf{
 Label:
