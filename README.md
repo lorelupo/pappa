@@ -54,11 +54,11 @@ Possible labels are:
 }}$
 
 - $\textcolor{blue}{\textsf{passive: fathers who are not actively involved in hands-on care and upbringing of the child;}}$
-- $\textcolor{blue}{\textsf{active_negative: fathers exhibiting harmful behaviours like aggression, violence, or neglect;}}$
-- $\textcolor{blue}{\textsf{active_positive_caring: fathers providing care, warmth, empathy, and support;}}$
-- $\textcolor{blue}{\textsf{active_positive_challenging: fathers encouraging risk-taking, growth, and educational activities;}}$
-- $\textcolor{blue}{\textsf{active_positive_other: fathers displaying competence, responsibility, trustworthiness, etc., without specifying a specific role;}}$
-- $\textcolor{blue}{\textsf{not_applicable: not applicable.}}$
+- $\textcolor{blue}{\textsf{active\_negative: fathers exhibiting harmful behaviours like aggression, violence, or neglect;}}$
+- $\textcolor{blue}{\textsf{active\_positive\_caring: fathers providing care, warmth, empathy, and support;}}$
+- $\textcolor{blue}{\textsf{active\_positive\_challenging: fathers encouraging risk-taking, growth, and educational activities;}}$
+- $\textcolor{blue}{\textsf{active\_positive\_other: fathers displaying competence, responsibility, trustworthiness, etc., without specifying a specific role;}}$
+- $\textcolor{blue}{\textsf{not\_applicable: not applicable.}}$
 
 
 $\textcolor{red}{\textsf{
