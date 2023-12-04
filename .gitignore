@@ -1,4 +1,7 @@
-.vscode
-tmp
 __pycache__
+.vscode
 .env
+exps
+tmp
+myresults
+mynotebooks
