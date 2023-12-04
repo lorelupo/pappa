@@ -2,9 +2,7 @@
 
 Annotate your texts using large generative language models (LMs) from [Hugging Face](https://huggingface.co/models) or [OpenAI's API](https://openai.com/blog/openai-api) (GPT).
 
-The methodology is described in [How to Use Large Language Models for Text Coding: The Case of Fatherhood Roles in Public Policy Documents](). The data used in the paper are available in the folder [data/pappa](data/pappa).
-
-<!-- The methodology is described in [How to Use Large Language Models for Text Coding: The Case of Fatherhood Roles in Public Policy Documents](https://arxiv.org/abs/2311.11844). The data used in the paper are available in the folder [data/pappa](data/pappa). -->
+The methodology is described in [How to Use Large Language Models for Text Coding: The Case of Fatherhood Roles in Public Policy Documents](https://arxiv.org/abs/2311.11844). The data used in the paper are available in the folder [data/pappa](data/pappa).
 
 
 
@@ -164,7 +162,7 @@ python main.py \
     --evaluation_only True
 ```
 
-<!-- ## Citation
+## Citation
 
 ```
 @misc{lupo2023use,
@@ -175,4 +173,4 @@ python main.py \
       archivePrefix={arXiv},
       primaryClass={cs.CL}
 }
-``` -->
+```
