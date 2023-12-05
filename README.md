@@ -8,6 +8,7 @@ The methodology is described in [How to Use Large Language Models for Text Codin
 
 ## Install
 
+Open a terminal and launch the following commands:
 ```
 git clone git@github.com:lorelupo/pappa
 cd pappa
