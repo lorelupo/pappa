@@ -167,12 +167,12 @@ class GPTClassifier(LMClassifier):
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
     @staticmethod
-    @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
+    @backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APIError), max_tries=5)
     def completions_with_backoff(**kwargs):
         return openai.Completion.create(**kwargs) 
 
     @staticmethod
-    @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.ServiceUnavailableError, openai.error.APIError), max_tries=5)
+    @backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APIError), max_tries=5)
     def chat_completions_with_backoff(**kwargs):
         return openai.ChatCompletion.create(**kwargs) 
 
