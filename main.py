@@ -46,6 +46,7 @@ def annotate_and_evaluate(
         aggregated_gold_name="agg",
         log_to_file=True,
         raw_predictions_good=False,
+        remove_prompt_from_output=False
         ):
 
     """
@@ -145,7 +146,7 @@ def annotate_and_evaluate(
         if model_name in OPENAI_MODELS:
             prompts, predictions = classifier.generate_predictions(input_texts, sleep_after_step=sleep_after_step)
         else:
-            prompts, predictions = classifier.generate_predictions(input_texts)
+            prompts, predictions = classifier.generate_predictions(input_texts, remove_prompt_from_output=remove_prompt_from_output)
 
         # Save raw predictions
         with open(os.path.join(output_dir, 'raw_predictions.txt'), 'w') as f:

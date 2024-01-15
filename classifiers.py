@@ -11,8 +11,7 @@ from logging import getLogger, StreamHandler
 logger = getLogger(__name__)
 logger_backoff = getLogger('backoff').addHandler(StreamHandler())
 
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoConfig
 
 AVG_TOKENS_PER_EN_WORD = 4/3 # according to: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
 AVG_TOKENS_PER_NONEN_WORD = 5 # adjust according to the language of the input text
@@ -233,7 +232,8 @@ class GPTClassifier(LMClassifier):
                         presence_penalty=0
                     )
                     # Extract the predicted label from the output
-                    predicted_label = gpt_out['choices'][0]['message']['content'].strip()
+                    predicted_label = gpt_out['choices'][0]['message']['content']
+                    predicted_label = predicted_label.strip().replace('\n', ' ')
 
                     # Save predicted label to file, together with the index of the prompt
                     with open('raw_predictions_cache.txt', 'a') as f:
@@ -254,7 +254,8 @@ class GPTClassifier(LMClassifier):
                         presence_penalty=0
                     )
                     # Extract the predicted label from the output
-                    predicted_label = gpt_out['choices'][0]['text'].strip()
+                    predicted_label = gpt_out['choices'][0]['text']
+                    predicted_label = predicted_label.strip().replace('\n', ' ')
 
             # manage API errors
             except Exception as e:
@@ -289,10 +290,73 @@ class HFLMClassifier(LMClassifier):
         self.device = 'GPU' if torch.cuda.is_available() else 'CPU'
         logger.info(f'Running on {self.device} device...')
 
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name, torch_dtype="auto", device_map="auto", cache_dir=cache_dir)
+        # Load config and inspect whether the model is a seq2seq or causal LM
+        config = None
+        try:
+            config = AutoConfig.from_pretrained(model_name)
 
-    def generate_predictions(self, input_texts):
+            if config.architectures == "LLaMAForCausalLM":
+                logger.warning(
+                    "We found a deprecated LLaMAForCausalLM architecture in the model's config and updated it to LlamaForCausalLM."
+                )
+                config.architectures == "LlamaForCausalLM"
+
+            is_encoder_decoder = getattr(config, "is_encoder_decoder", None)
+            if is_encoder_decoder == None:
+                logger.warning(
+                    "Could not find 'is_encoder_decoder' in the model config. Assuming it's an autoregressive model."
+                )
+                is_encoder_decoder = False
+
+        except:
+            logger.warning(
+                f"Could not find config in {model_name}. Assuming it's an autoregressive model."
+            )
+            is_encoder_decoder = False
+
+        self.is_encoder_decoder = is_encoder_decoder
+
+        if is_encoder_decoder:
+            model_cls = AutoModelForSeq2SeqLM
+        else:
+            model_cls = AutoModelForCausalLM
+
+        # Load tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            model_name, config=config, padding_side="left"
+        )
+
+        # padding_size="left" is required for autoregressive models, and should not make a difference for every other model as we use attention_masks. See: https://github.com/huggingface/transformers/issues/3021#issuecomment-1454266627 for a discussion on why left padding is needed on batched inference
+        self.tokenizer.padding_side = "left"
+
+        logger.debug("Setting off the deprecation warning for padding")
+        # see https://github.com/huggingface/transformers/issues/22638
+        # and monitor https://github.com/huggingface/transformers/pull/23742
+        self.tokenizer.deprecation_warnings["Asking-to-pad-a-fast-tokenizer"] = True
+        
+        # Load model
+        try:
+            self.model = model_cls.from_pretrained(model_name, torch_dtype="auto", device_map="auto", cache_dir=cache_dir)
+        except:    
+            logger.debug("Removig device_map and trying loading model again")
+            self.model = model_cls.from_pretrained(model_name, torch_dtype="auto", cache_dir=cache_dir)
+
+        if not getattr(self.tokenizer, "pad_token", None):
+            logger.warning(
+                "Couldn't find a PAD token in the tokenizer, using the EOS token instead."
+            )
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        # try:
+        #     self.generation_config = GenerationConfig.from_pretrained(
+        #         model_name
+        #     )
+        # except Exception as e:
+        #     logger.warning("Could not load generation config. Using default one.")
+        #     self.generation_config = DefaultGenerationConfig()
+
+
+    def generate_predictions(self, input_texts, remove_prompt_from_output=False):
 
         # Encode the labels
         encoded_labels = self.tokenizer(list(self.labels_dict.keys()), padding=True, truncation=True, return_tensors="pt")['input_ids']
@@ -347,8 +411,12 @@ class HFLMClassifier(LMClassifier):
                     logger.info(f'Original input text length: {len_inputs}. Input has been truncated to {self.max_len_model} tokens.')
                 
                 # Generate a prediction
-                outputs = self.model.generate(**inputs, max_new_tokens=max_len) # or max_length=inputs['input_ids'].shape[1]+max_len
-                predicted_label = self.tokenizer.decode(outputs[0].tolist(), skip_special_tokens=True)
+                outputs = self.model.generate(**inputs, max_new_tokens=max_len)[0].tolist() # or max_length=inputs['input_ids'].shape[1]+max_len
+                if remove_prompt_from_output:                    
+                    outputs = outputs[len(inputs["input_ids"][0]) :]
+                predicted_label = self.tokenizer.decode(outputs, skip_special_tokens=True)
+                predicted_label = predicted_label.strip().replace('\n', ' ')
+                # Store it in the list of predictions
                 predictions.append(predicted_label)
 
             # Clear the cache after each iteration

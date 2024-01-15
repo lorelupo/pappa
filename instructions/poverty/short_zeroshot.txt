@@ -1,4 +1,0 @@
-Label the following tweet about poverty according to whether it refers to a specific ethnicity or not.
-Possible labels are: white, black, asian, hispanic, women, men, none.
-
-Text: 
