@@ -2,14 +2,29 @@
 import os
 import fire
 import pandas as pd
-from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score
+from sklearn.metrics import cohen_kappa_score, accuracy_score, f1_score, classification_report, confusion_matrix
 from utils import setup_logging
 from logging import getLogger
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import shutil
+
 logger = getLogger(__name__)
 
-def evaluate_predictions(df, gold_labels, aggregated_gold_name='agg', logdir=None):
+def copy_and_rename_log(output_dir, eval_dim):
+    if output_dir is not None and eval_dim is not None:
+        original_log_file = os.path.join(output_dir, 'evaluate.log')
+        new_log_file = os.path.join(output_dir, f'evaluate_{eval_dim}.log')
+        if os.path.exists(original_log_file):
+            shutil.copy2(original_log_file, new_log_file)
+            logger.info(f"Copied and renamed log file to {new_log_file}")
+        else:
+            logger.warning("Original log file does not exist. No file was copied.")
 
-    setup_logging(os.path.basename(__file__).split('.')[0], logger, logdir if logdir else None)
+def evaluate_predictions(df, gold_labels, aggregated_gold_name='agg', output_dir=None, log_to_file=True, eval_dim=None):
+
+    setup_logging(os.path.basename(__file__).split('.')[0], logger, output_dir if log_to_file else None)
 
     # Add gold_ to the gold labels' column names if 'gold' is missing
     for col in gold_labels.columns:
@@ -32,6 +47,10 @@ def evaluate_predictions(df, gold_labels, aggregated_gold_name='agg', logdir=Non
     # retrieve the name of each gold annotation
     gold_names = gold_labels.columns.tolist()
 
+    # Lowercase all labels in predictions and gold labels
+    df['prediction'] = df['prediction'].str.lower()
+    gold_labels = gold_labels.apply(lambda x: x.str.lower())
+
     # define tables where to store results
     df_kappa = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
     df_accuracy = pd.DataFrame(columns=gold_names+['model'], index=gold_names+['model']).fillna(1.0)
@@ -39,6 +58,7 @@ def evaluate_predictions(df, gold_labels, aggregated_gold_name='agg', logdir=Non
 
     for i, col in enumerate(gold_names):
         # compare agreement with gold labels
+        class_report = classification_report(gold_labels[col].astype(str), df['prediction'].astype(str), output_dict=False)
         kappa = cohen_kappa_score(df['prediction'].astype(str), gold_labels[col].astype(str))
         accuracy = accuracy_score(df['prediction'].astype(str), gold_labels[col].astype(str))
         # Compute F1 with average=binary if only 2 labels, otherwise average=macro
@@ -68,6 +88,48 @@ def evaluate_predictions(df, gold_labels, aggregated_gold_name='agg', logdir=Non
     # containing their aggregation computed with majority voting or tools like MACE - https://github.com/dirkhovy/MACE)
     non_agg_gold_names = [name for name in gold_names if aggregated_gold_name not in name]
 
+    # Extract all unique labels from predictions and gold labels for plotting
+    all_labels_predicted = set(df['prediction'].unique())
+    all_labels_gold = set(gold_labels[gold_names].values.flatten())
+    all_unique_labels = sorted(all_labels_predicted.union(all_labels_gold))
+
+    # Calculate confusion matrix and classification report for each set of gold labels
+    conf_matrices = []
+    for col in gold_names:
+        conf_matrix = confusion_matrix(gold_labels[col], df['prediction'], labels=None)
+        conf_matrices.append(conf_matrix)
+
+        # Log the classification report
+        class_report = classification_report(gold_labels[col], df['prediction'], output_dict=False)
+        logger.info(f"Classification Report for model/{col}:\n{class_report}\n")
+
+    # Calculate the average confusion matrix
+    average_conf_matrix = np.mean(conf_matrices, axis=0)
+
+    logger.info(f"output_dir: {output_dir}, eval_dim: {eval_dim}")
+
+    # Before the "plt.show()" command, specify the filename and directory for saving the plot
+    if eval_dim is not None: 
+        plot_filename = f'average_confusion_matrix_{eval_dim}.png'
+    else: 
+        plot_filename = 'average_confusion_matrix.png'
+
+    plot_path = os.path.join(output_dir, plot_filename)
+
+    # Plot the average confusion matrix
+    plt.figure(figsize=(10, 7))
+    sns.heatmap(average_conf_matrix, annot=True, fmt=".2f", cmap='Blues', xticklabels=all_unique_labels, yticklabels=all_unique_labels)
+    plt.title('Average Confusion Matrix')
+    plt.ylabel('Actual Label')
+    plt.xlabel('Predicted Label')
+    plt.xticks(rotation=45, ha='right')  # Improve label readability
+    plt.yticks(rotation=45)
+    plt.savefig(plot_path)
+    plt.close()
+
+    # Log the location of the saved plot
+    logger.info(f"Plot saved to {plot_path}")
+    
     # compute average agreement between gold annotations (except the aggregated annotation)
     if len(gold_names) > 1:
         df_kappa['mean_non_agg'] = df_kappa[non_agg_gold_names].mean(axis=1)
@@ -93,11 +155,15 @@ def evaluate_predictions(df, gold_labels, aggregated_gold_name='agg', logdir=Non
         logger.info(f"Golds' mean F1: {100*df_f1.mean_non_agg[:-1].mean():.2f}")
         logger.info(f"Model's mean F1: {100*df_f1.model[:-1].mean():.2f}")
     
+        copy_and_rename_log(output_dir, eval_dim)
+
         return df_kappa, df_accuracy, df_f1
     else:
         logger.info(f"KAPPA: {kappa*100:.2f}")
         logger.info(f"ACCURACY: {accuracy*100:.2f}")
         logger.info(f"F1: {f1*100:.2f}")
+
+        copy_and_rename_log(output_dir, eval_dim)
         
         return kappa, accuracy, f1
     

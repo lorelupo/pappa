@@ -1,0 +1,8 @@
+{
+    "labels": {
+        "other": "OTHER",
+        "process": "PROCESS"
+        },
+    "default_label": "other",
+    "read_function": "read_data"
+}
