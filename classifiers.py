@@ -239,6 +239,7 @@ class GPTClassifier(LMClassifier):
                     )
                     # Extract the predicted label from the output
                     predicted_label = gpt_out.choices[0].message.content
+                    predicted_label = predicted_label.strip().replace('\n', ' ')
 
                     # Save predicted label to file, together with the index of the prompt
                     with open('raw_predictions_cache.txt', 'a') as f:
@@ -260,6 +261,7 @@ class GPTClassifier(LMClassifier):
                     )
                     # Extract the predicted label from the output
                     predicted_label = gpt_out.choices[0].message.text.strip()
+                    predicted_label = predicted_label.strip().replace('\n', ' ')
 
             # manage API errors
             except Exception as e:
