@@ -3,7 +3,7 @@ import fire
 import pandas as pd 
 from utils import incremental_path, setup_logging
 from task_manager import TaskManager
-from classifiers import HFLMClassifier, GPTClassifier, LMClassifier
+from classifiers import HFLMClassifier2, GPTClassifier, LMClassifier
 from evaluate import evaluate_predictions
 from logging import getLogger
 logger = getLogger(__name__)
@@ -38,7 +38,11 @@ def annotate_and_evaluate(
         model_name,
         max_len_model,
         output_dir,
-        cache_dir=None,
+        device_map="auto",
+        tokenizer_name=None,
+        lora_weights=None,
+        compile_model=False,
+        use_bettertransformer=False,
         evaluation_only=False,
         only_dim=None,
         gpt_system_role="You are a helpful assistant.",
@@ -46,7 +50,15 @@ def annotate_and_evaluate(
         aggregated_gold_name="agg",
         log_to_file=True,
         raw_predictions_good=False,
-        remove_prompt_from_output=False
+        batch_size="auto",
+        starting_batch_size=256,
+        num_workers=4,
+        skip_prompt=True,
+        log_batch_sample=-1,
+        show_progress_bar=True,
+        apply_chat_template=True,
+        add_generation_prompt=False,
+        max_new_tokens=1000
         ):
 
     """
@@ -58,7 +70,6 @@ def annotate_and_evaluate(
         model_name: name of the model to use (for HuggingFace models, use the full name, e.g. "username/model_name")
         max_len_model: maximum input length of the model
         output_dir: path to the output directory
-        cache_dir: path to the cache directory, where to store/load the HF model
         evaluation_only: if True, only evaluate the predictions that are already present in the output_dir
         only_dim: if not None, only evaluate the predictions for the given dimension
         gpt_system_role: if model_name is an OpenAI model, this is the role of the system in the conversation
@@ -89,7 +100,7 @@ def annotate_and_evaluate(
 
     # Define task and load data
     tm = TaskManager(task_file)
-    logger.info(f'Loading data...')
+    logger.info(f'Loading data: {data_file}')
     input_texts, gold_labels = tm.read_data(data_file)
 
     # Define classifier
@@ -119,17 +130,20 @@ def annotate_and_evaluate(
                 log_to_file=log_to_file,
                 )
     else:
-        classifier = HFLMClassifier(
+        classifier = HFLMClassifier2(
             labels_dict=tm.labels,
             label_dims=tm.label_dims,
             default_label=tm.default_label,
             instruction=instruction,
             prompt_suffix=prompt_suffix,
             model_name=model_name,
-            max_len_model=max_len_model,
+            max_len_model=max_len_model, # TODO infer these numbers automatically for HF models though the attribute self.model.config.max_position_embeddings
             output_dir=output_dir,
-            cache_dir=cache_dir,
-            log_to_file=log_to_file,
+            device_map=device_map,
+            tokenizer_name=tokenizer_name,
+            lora_weights=lora_weights,
+            compile_model=compile_model,
+            use_bettertransformer=use_bettertransformer,
             )
 
     if evaluation_only:
@@ -146,7 +160,18 @@ def annotate_and_evaluate(
         if model_name in OPENAI_MODELS:
             prompts, predictions = classifier.generate_predictions(input_texts, sleep_after_step=sleep_after_step)
         else:
-            prompts, predictions = classifier.generate_predictions(input_texts, remove_prompt_from_output=remove_prompt_from_output)
+            prompts, predictions = classifier.generate_predictions(
+                            input_texts,
+                            batch_size=batch_size,
+                            starting_batch_size=starting_batch_size,
+                            num_workers=num_workers,
+                            skip_prompt=skip_prompt,
+                            log_batch_sample=log_batch_sample,
+                            show_progress_bar=show_progress_bar,
+                            apply_chat_template=apply_chat_template,
+                            add_generation_prompt=add_generation_prompt,
+                            max_new_tokens=max_new_tokens,
+            )
 
         # Save raw predictions
         with open(os.path.join(output_dir, 'raw_predictions.txt'), 'w') as f:

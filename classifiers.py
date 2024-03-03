@@ -1,11 +1,12 @@
 import openai
 import backoff
-from dotenv import load_dotenv
 import os
 import time
 import pandas as pd
 import collections 
 import torch
+from dotenv import load_dotenv
+from simple_generation import SimpleGenerator
 from utils import setup_logging
 from logging import getLogger, StreamHandler
 logger = getLogger(__name__)
@@ -50,6 +51,37 @@ class LMClassifier:
 
     def generate_predictions(self):
         raise NotImplementedError
+
+    def set_max_len_input_text(self):
+        # set the average number of tokens per word in order to compute the max length of the input text
+        self.avg_tokens_per_en_word = AVG_TOKENS_PER_EN_WORD
+        self.avg_tokens_per_nonen_word = AVG_TOKENS_PER_NONEN_WORD # TODO infer these numbers automatically for HF models tokenizing a sample of data and comparing #tokens/#words
+        self.avg_tokens_per_word_avg = (self.avg_tokens_per_en_word + self.avg_tokens_per_nonen_word) / 2
+
+        # if prompt is longer then max_len_model, we will remove words from the input text
+        # differently from HF models, where we have access to the tokenizer, here we work on full words
+        len_instruction = len(self.instruction.split())
+        len_output = len(self.prompt_suffix.split())
+        self.max_len_input_text = int(
+            (self.max_len_model - len_instruction*self.avg_tokens_per_en_word - len_output*self.avg_tokens_per_en_word) / self.avg_tokens_per_word_avg
+            )
+    
+    def adapt_prompt_to_max_len_model(self, prompt, input_text):
+        # if prompt is longer then max_len_model, remove words from the imput text
+        len_prompt = int(len(prompt.split())*self.avg_tokens_per_word_avg)
+        if len_prompt > self.max_len_model:
+            # remove words from the input text
+            input_text = prompt.split()
+            input_text = input_text[:self.max_len_input_text]
+            input_text = ' '.join(input_text)
+            prompt = f'{self.instruction} {input_text} {self.prompt_suffix}'
+            # print detailed info about the above operation
+            logger.info(
+                f'Prompt was too long, so we removed words from it. '
+                f'Approx original length: {len_prompt}; '
+                f'Approx new length: {int(len(prompt.split())*self.avg_tokens_per_word_avg)}'
+                )
+        return prompt
     
     def range_robust_get_label(self, prediction, bounds):
         # more robust get label function that manages numbers in the returned text and assigns them to the correct range in case of number ranges
@@ -144,20 +176,9 @@ class GPTClassifier(LMClassifier):
             gpt_system_role="You are a helpful assistant.",
             **kwargs,
             ):
-        super().__init__(labels_dict, label_dims, default_label, instruction, prompt_suffix, model_name, max_len_model, **kwargs)  
-        
-        # set the average number of tokens per word in order to compute the max length of the input text
-        self.avg_tokens_per_en_word = AVG_TOKENS_PER_EN_WORD
-        self.avg_tokens_per_nonen_word = AVG_TOKENS_PER_NONEN_WORD
-        self.avg_tokens_per_word_avg = (self.avg_tokens_per_en_word + self.avg_tokens_per_nonen_word) / 2
+        super().__init__(labels_dict, label_dims, default_label, instruction, prompt_suffix, model_name, max_len_model, **kwargs)
 
-        # if prompt is longer then max_len_model, we will remove words from the imput text
-        # differently from HF models, where we have access to the tokenizer, here we work on full words
-        len_instruction = len(self.instruction.split())
-        len_output = len(self.prompt_suffix.split())
-        self.max_len_input_text = int(
-            (self.max_len_model - len_instruction*self.avg_tokens_per_en_word - len_output*self.avg_tokens_per_en_word) / self.avg_tokens_per_word_avg
-            )
+        self.set_max_len_input_text()
 
         # define the role of the system in the conversation
         self.system_role = gpt_system_role
@@ -189,21 +210,8 @@ class GPTClassifier(LMClassifier):
             # Create the prompt
             prompt = f'{self.instruction} {input_text} {self.prompt_suffix}'
 
-            # if prompt is longer then max_len_model, remove words from the imput text
-            len_prompt = int(len(prompt.split())*self.avg_tokens_per_word_avg)
-            if len_prompt > self.max_len_model:
-                # remove words from the input text
-                input_text = input_text.split()
-                input_text = input_text[:self.max_len_input_text]
-                input_text = ' '.join(input_text)
-                prompt = f'{self.instruction} {input_text} {self.prompt_suffix}'
-
-                # print detailed info about the above operation
-                logger.info(
-                    f'Prompt n.{i} was too long, so we removed words from it. '
-                    f'Approx original length: {len_prompt}; '
-                    f'Approx new length: {int(len(prompt.split())*self.avg_tokens_per_word_avg)}'
-                    )
+            # adapt prompt to max_len_model
+            prompt = self.adapt_prompt_to_max_len_model(prompt, input_text)
 
             # log first prompt
             logger.info(prompt) if i == 0 else None
@@ -421,5 +429,100 @@ class HFLMClassifier(LMClassifier):
 
             # Clear the cache after each iteration
             torch.cuda.empty_cache()
+
+        return prompts, predictions
+    
+
+class HFLMClassifier2(LMClassifier):
+    def __init__(
+            self,
+            labels_dict,
+            label_dims,
+            default_label,
+            instruction,
+            prompt_suffix,
+            model_name,
+            max_len_model,
+            output_dir=None,
+            device_map="auto",
+            tokenizer_name=None,
+            lora_weights=None,
+            compile_model=False,
+            use_bettertransformer=False,
+            **kwargs
+            ):
+                
+        super().__init__(labels_dict, label_dims, default_label, instruction, prompt_suffix, model_name, max_len_model, output_dir, **kwargs)
+
+        load_dotenv('.env')
+        self.hf_api_key = os.getenv("HF_API_KEY") if os.getenv("HF_API_KEY") else None
+
+        self.set_max_len_input_text()
+
+        self.generator = SimpleGenerator(
+            model_name_or_path=model_name,
+            tokenizer_name_or_path=tokenizer_name,
+            lora_weights=lora_weights,
+            compile_model=compile_model,
+            use_bettertransformer=use_bettertransformer,
+            device_map=device_map,
+            torch_dtype=torch.bfloat16,
+            token=self.hf_api_key,
+        )
+
+
+    def generate_predictions(
+            self,
+            input_texts,
+            batch_size="auto",
+            starting_batch_size=256,
+            num_workers=4,
+            skip_prompt=False,
+            log_batch_sample=-1,
+            show_progress_bar=True,
+            apply_chat_template=False,
+            add_generation_prompt=False,
+            max_new_tokens=1000,
+            ):
+
+        """
+        # Encode the labels
+        encoded_labels = self.generator.tokenizer(list(self.labels_dict.keys()), padding=True, truncation=True, return_tensors="pt")['input_ids']
+        logger.info(f'Encoded labels: \n{encoded_labels}')
+
+        # Retrieve the tokens associated to encoded labels and print them
+        # decoded_labels = tokenizer.batch_decode(encoded_labels)
+        # print(f'Decoded labels: \n{decoded_labels}')
+        max_len_output = max(encoded_labels.shape[1:])
+        logger.info(f'Maximum length of the encoded labels: {max_len_output}')
+        """
+
+        # Create the prompts
+        prompts = [
+            self.adapt_prompt_to_max_len_model(
+                prompt=f'{self.instruction} {input_text} {self.prompt_suffix}',
+                input_text=input_text,
+                ) for input_text in input_texts
+                ]
+        
+        # Log first prompt
+        logger.info(prompts[0])
+
+        # Generate predictions
+        predictions = self.generator(
+            prompts,
+            batch_size=batch_size,
+            starting_batch_size=starting_batch_size,
+            num_workers=num_workers,
+            skip_prompt=skip_prompt,
+            log_batch_sample=log_batch_sample,
+            show_progress_bar=show_progress_bar,
+            apply_chat_template=apply_chat_template,
+            add_generation_prompt=add_generation_prompt,
+            max_new_tokens=max_new_tokens,
+            temperature=0,
+            )
+        
+        predictions = [pred.strip().replace('\n', ' ') for pred in predictions]
 
         return prompts, predictions

@@ -6,3 +6,4 @@ python-dotenv==1.0.0
 scikit_learn==1.2.2
 torch==2.0.1
 transformers==4.33.2
+simple_generation
