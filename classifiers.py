@@ -1,7 +1,9 @@
+from openai import OpenAI
 import openai
 import backoff
 import os
 import time
+import re
 import pandas as pd
 import collections 
 import torch
@@ -11,6 +13,11 @@ from utils import setup_logging
 from logging import getLogger, StreamHandler
 logger = getLogger(__name__)
 logger_backoff = getLogger('backoff').addHandler(StreamHandler())
+
+# load environment variables
+load_dotenv('.env')
+client = OpenAI()
+client.api_key = os.getenv("OPENAI_API_KEY")
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoConfig
 
@@ -43,7 +50,7 @@ class LMClassifier:
         
         # Define the instruction and ending ending string for prompt formulation
         # If instruction is a path to a file, read the file, else use the instruction as is
-        self.instruction = open(instruction, 'r').read() if os.path.isfile(instruction) else instruction
+        self.instruction = open(instruction, 'r', encoding='utf-8').read() if os.path.isfile(instruction) else instruction
         self.prompt_suffix = prompt_suffix.replace('\\n', '\n')
 
         self.max_len_model = max_len_model
@@ -116,6 +123,7 @@ class LMClassifier:
             logger.info("Retrieving predictions...")
             for prediction in predictions:
                 labels_in_prediction = [self.labels_dict.get(label) for label in self.labels_dict.keys() if label in prediction.split()]
+                labels_in_prediction = [label for label in labels_in_prediction if label is not None]  # Filter out None values
                 if len(labels_in_prediction) > 0:
                     predicted_labels.append(labels_in_prediction[0])
                 else:
@@ -142,7 +150,8 @@ class LMClassifier:
                     labels_in_prediction.append(dim_label)                                            
                 predicted_labels.append(labels_in_prediction)
             # Count the number of predictions of each type and print the result
-            logger.info(collections.Counter([",".join(labels) for labels in predicted_labels]))
+            logger.info(collections.Counter([",".join(str(label) if label is not None else '' for label in labels) for labels in predicted_labels]))
+
         
         # Add the data to a DataFrame
         if self.label_dims == 1:
@@ -182,19 +191,16 @@ class GPTClassifier(LMClassifier):
 
         # define the role of the system in the conversation
         self.system_role = gpt_system_role
-        # load environment variables
-        load_dotenv('.env')
-        openai.api_key = os.getenv("OPENAI_API_KEY")
 
     @staticmethod
     @backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APIError), max_tries=5)
     def completions_with_backoff(**kwargs):
-        return openai.Completion.create(**kwargs) 
+        return client.completions.create(**kwargs) 
 
     @staticmethod
     @backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APIError), max_tries=5)
     def chat_completions_with_backoff(**kwargs):
-        return openai.ChatCompletion.create(**kwargs) 
+        return client.chat.completions.create(**kwargs)
 
     def generate_predictions(
             self,
@@ -240,7 +246,7 @@ class GPTClassifier(LMClassifier):
                         presence_penalty=0
                     )
                     # Extract the predicted label from the output
-                    predicted_label = gpt_out['choices'][0]['message']['content']
+                    predicted_label = gpt_out.choices[0].message.content
                     predicted_label = predicted_label.strip().replace('\n', ' ')
 
                     # Save predicted label to file, together with the index of the prompt
@@ -262,7 +268,7 @@ class GPTClassifier(LMClassifier):
                         presence_penalty=0
                     )
                     # Extract the predicted label from the output
-                    predicted_label = gpt_out['choices'][0]['text']
+                    predicted_label = gpt_out.choices[0].message.text.strip()
                     predicted_label = predicted_label.strip().replace('\n', ' ')
 
             # manage API errors

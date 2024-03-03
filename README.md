@@ -29,6 +29,9 @@ python main.py \
     --max_len_model 2048 \
     --output_dir tmp
 ```
+```command terminal
+python main.py --data_file data/pappa/human_annotation/dim1.csv --instruction instructions/pappa/dim1/long_fewshot.txt --task_file tasks/pappa/dim1.json --prompt_suffix "\\nLabel:" --model_name gpt-4-0125-preview --max_len_model 2048 --output_dir tmp --evaluation_only False
+```
 
 Example usage with an open-source LM hosted on Hugging Face:
 
@@ -36,7 +39,7 @@ Example usage with an open-source LM hosted on Hugging Face:
 python main.py \
     --data_file data/pappa/human_annotation/dim1.csv \
     --instruction instructions/pappa/dim1/short_zeroshot.txt \
-    --task_file tasks/pappa/dim1.json \
+    --task_file tasks/pappa/single/dim1.json \
     --prompt_suffix "\\nLabel:" \
     --model_name google/flan-t5-small \
     --max_len_model 512 \
@@ -46,6 +49,8 @@ python main.py \
 ### Data file
 
 The supported data file formats are `.xlsx` (Excel), semicolon-separated `.csv`, and `.pkl`. The texts to be annotated should be listed under a column named `text`. 
+
+The datafile fills two purposes: It supplies the chosen model with texts to be annotated, and it provides it with gold_labels for evaluation purposes. 
 
 ### Prompt
 
@@ -107,13 +112,19 @@ The data-reading function needs to be defined in the [task_manager.py](task_mana
 Supported language models are all generative models that are downloadable from [Hugging Face](https://huggingface.co/models) (e.g., [google/flan-t5-large](https://huggingface.co/google/flan-t5-large)) and the following OpenAI models: 
 
 ```python
+
 OPENAI_MODELS = [
     "gpt-4",
     "gpt-4-0613",
+    "gpt-4-turbo-preview",
+    "gpt-4-1106-preview",
+    "gpt-4-0125-preview",
     "gpt-4-32k",
     "gpt-4-32k-0613",
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo-0125",
     "gpt-3.5-turbo-0613",
     "gpt-3.5-turbo-16k-0613",
     "code-davinci-002",
@@ -155,13 +166,48 @@ The option `--evaluation_only True` allows to evaluate the annotation by the LM 
 python main.py \
     --data_file data/pappa/human_annotation/dim1.csv \
     --instruction instructions/pappa/dim1/short_zeroshot.txt \
-    --task_file tasks/pappa/dim1.json \
+    --task_file tasks/pappa/single/dim1.json \
     --prompt_suffix "\\nLabel:" \
     --model_name google/flan-t5-small \
     --max_len_model 512 \
     --output_dir tmp \
     --evaluation_only True
 ```
+
+Note: When choosing --evaluation_only True, the evaluation will be run against the latest saved tmp-file matching the command. For example, if you have [text](tmp/pappa/alldim/long_fewshot_gpt-35-turbo-0613_4) but want to evaluate an earlier instance [text](tmp/pappa/alldim/long_fewshot_gpt-35-turbo-0613_3), you ought to temporarily rename one of the files to allow for the tmp file to be evaluated to have the highest number. 
+
+## Evaluation multiple classification
+
+The current setup does not allow for evaluating several classification dimensions at one time. Instead, the dimensions are evaluated one at a time. The option 'eval_dim' enables the selection of the dimension to be evaluated. When running multiple classification annotation/validation, make sure that the task file is placed in the correct "multi" subfolder. For example:  
+
+```bash
+python main.py \
+    --data_file data/pappa/human_annotation/dim1.csv \
+    --instruction instructions/pappa/alldim/long_fewshot.txt \
+    --task_file tasks/pappa/multi/all.json \
+    --prompt_suffix "\\nLabel:" \
+    --model_name gpt-4-0125-preview \
+    --max_len_model 512 \
+    --output_dir tmp \
+    --evaluation_only False \
+    --eval_dim dim1
+```
+
+The above example will generate annotations for all dimensions but only evaluate the chosen dimension. If you want to evaluate the another dimension, make sure to change "evaluation only" to True, "data_file" (for correct gold_labels) and "eval_dim" (for corresponding annotations) but not the "task_file". For example: 
+
+```bash
+python main.py \
+    --data_file data/pappa/human_annotation/dim2.csv \
+    --instruction instructions/pappa/alldim/long_fewshot.txt \
+    --task_file tasks/pappa/multi/all.json \
+    --prompt_suffix "\\nLabel:" \
+    --model_name gpt-4-0125-preview \
+    --max_len_model 512 \
+    --output_dir tmp \
+    --evaluation_only True \
+    --eval_dim dim2
+```
+Each time the script is run for a new dimension, a new confusion matrix and evaluation.log for the specified dimension will be saved. 
 
 ## Citation
 
