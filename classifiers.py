@@ -59,6 +59,7 @@ class LMClassifier:
     def generate_predictions(self):
         raise NotImplementedError
 
+    # adapt this function to the specific model instead of using a generic AVG_TOKENS_PER_EN_WORD
     def set_max_len_input_text(self):
         # set the average number of tokens per word in order to compute the max length of the input text
         self.avg_tokens_per_en_word = AVG_TOKENS_PER_EN_WORD
@@ -73,7 +74,7 @@ class LMClassifier:
             (self.max_len_model - len_instruction*self.avg_tokens_per_en_word - len_output*self.avg_tokens_per_en_word) / self.avg_tokens_per_word_avg
             )
     
-    def adapt_prompt_to_max_len_model(self, prompt, input_text):
+    def adapt_prompt_to_max_len_model(self, prompt, input_text, text_id):
         # if prompt is longer then max_len_model, remove words from the imput text
         len_prompt = int(len(prompt.split())*self.avg_tokens_per_word_avg)
         if len_prompt > self.max_len_model:
@@ -84,7 +85,7 @@ class LMClassifier:
             prompt = f'{self.instruction} {input_text} {self.prompt_suffix}'
             # print detailed info about the above operation
             logger.info(
-                f'Prompt was too long, so we removed words from it. '
+                f'Prompt {text_id} is too long for the model. '
                 f'Approx original length: {len_prompt}; '
                 f'Approx new length: {int(len(prompt.split())*self.avg_tokens_per_word_avg)}'
                 )
@@ -217,7 +218,7 @@ class GPTClassifier(LMClassifier):
             prompt = f'{self.instruction} {input_text} {self.prompt_suffix}'
 
             # adapt prompt to max_len_model
-            prompt = self.adapt_prompt_to_max_len_model(prompt, input_text)
+            prompt = self.adapt_prompt_to_max_len_model(prompt, input_text, text_id=i)
 
             # log first prompt
             logger.info(prompt) if i == 0 else None
@@ -508,7 +509,8 @@ class HFLMClassifier2(LMClassifier):
             self.adapt_prompt_to_max_len_model(
                 prompt=f'{self.instruction} {input_text} {self.prompt_suffix}',
                 input_text=input_text,
-                ) for input_text in input_texts
+                text_id=i
+                ) for i, input_text in enumerate(input_texts)
                 ]
         
         # Log first prompt

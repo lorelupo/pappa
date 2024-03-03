@@ -174,7 +174,7 @@ def annotate_and_evaluate(
             instruction=instruction,
             prompt_suffix=prompt_suffix,
             model_name=model_name,
-            max_len_model=max_len_model, # TODO infer these numbers automatically for HF models though the attribute self.model.config.max_position_embeddings
+            max_len_model=max_len_model,
             output_dir=output_dir,
             device_map=device_map,
             tokenizer_name=tokenizer_name,

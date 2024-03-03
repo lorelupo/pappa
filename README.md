@@ -46,6 +46,14 @@ python main.py \
     --output_dir tmp
 ```
 
+This model will be run on GPU if available. If multiple GPUs are available but you only want to use one, you can select it by passing the `CUDA_VISIBLE_DEVICES` environment variable:
+
+```bash
+export CUDA_VISIBLE_DEVICES=0 # use GPU 0 only
+python main.py \
+    ...
+```
+
 ### Data file
 
 The supported data file formats are `.xlsx` (Excel), semicolon-separated `.csv`, and `.pkl`. The texts to be annotated should be listed under a column named `text`. 
@@ -109,7 +117,9 @@ The data-reading function needs to be defined in the [task_manager.py](task_mana
 
 ### Models
 
-Supported language models are all generative models that are downloadable from [Hugging Face](https://huggingface.co/models) (e.g., [google/flan-t5-large](https://huggingface.co/google/flan-t5-large)) and the following OpenAI models: 
+#### OpenAI LLMs
+
+Supported OpenAI models are: 
 
 ```python
 
@@ -138,16 +148,34 @@ OPENAI_MODELS = [
     "text-curie",
     "davinci-codex",
     "curie-codex",
-]*
-````
-\* this list can be easily expanded to new OpenAI models by simply adding them to it in the `main.py` file.
+]
+```
 
-### OpenAI API key
+This list can be easily expanded to new OpenAI models by simply adding them to it in the `main.py` file.
 
-In order to run LMs through the OpenAI's API, an API key is needed. You can create in this folder a file called [.env](./.env) containing your API key:
+#### Hugging Face LLMs
+
+All generative models that are downloadable from [Hugging Face](https://huggingface.co/models) (e.g., [google/flan-t5-large](https://huggingface.co/google/flan-t5-large)) are also supported. By default, the models will be downloaded in the default Hugging Face cache `~/.cache/huggingface/hub/`, and then loaded to memory. If you want to use another directory as models' cache, run
+
+```bash
+export TRANSFORMERS_CACHE="my-hf-cache"
+python main.py \
+    ...
+```
+
+
+### API keys
+
+In order to run LMs through the OpenAI's API, an API key is needed. For doing so, you can simply create in this folder a file called [.env](./.env) containing your API key:
 
 ```
 OPENAI_API_KEY = "write-your-key-here"
+```
+
+In the same file, you can also add your Hugging Face access token, so that you can download gated-access models such as Llamas:
+
+```
+HF_API_KEY = "write-your-token-here"
 ```
 
 ## Evaluation
@@ -176,7 +204,7 @@ python main.py \
 
 Note: When choosing --evaluation_only True, the evaluation will be run against the latest saved tmp-file matching the command. For example, if you have [text](tmp/pappa/alldim/long_fewshot_gpt-35-turbo-0613_4) but want to evaluate an earlier instance [text](tmp/pappa/alldim/long_fewshot_gpt-35-turbo-0613_3), you ought to temporarily rename one of the files to allow for the tmp file to be evaluated to have the highest number. 
 
-## Evaluation multiple classification
+## Evaluation for multi-task classification
 
 The current setup does not allow for evaluating several classification dimensions at one time. Instead, the dimensions are evaluated one at a time. The option 'eval_dim' enables the selection of the dimension to be evaluated. When running multiple classification annotation/validation, make sure that the task file is placed in the correct "multi" subfolder. For example:  
 
