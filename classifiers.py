@@ -8,6 +8,7 @@ import pandas as pd
 import collections 
 import torch
 from dotenv import load_dotenv
+from huggingface_hub import login
 from simple_generation import SimpleGenerator
 from utils import setup_logging
 from logging import getLogger, StreamHandler
@@ -461,8 +462,11 @@ class HFLMClassifier2(LMClassifier):
                 
         super().__init__(labels_dict, label_dims, default_label, instruction, prompt_suffix, model_name, max_len_model, output_dir, **kwargs)
 
+        # Login to Hugging Face to be able to load gated models from the hub
         load_dotenv('.env')
-        self.hf_api_key = os.getenv("HF_API_KEY") if os.getenv("HF_API_KEY") else None
+        if os.getenv("HF_API_KEY"):
+            login(token=os.getenv("HF_API_KEY"))
+        
 
         self.set_max_len_input_text()
 
