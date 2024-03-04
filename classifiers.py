@@ -478,7 +478,6 @@ class HFLMClassifier2(LMClassifier):
             use_bettertransformer=use_bettertransformer,
             device_map=device_map,
             torch_dtype=torch.bfloat16,
-            token=self.hf_api_key,
         )
 
 
