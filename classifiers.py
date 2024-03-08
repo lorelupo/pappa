@@ -114,9 +114,16 @@ class LMClassifier:
 
 
     def retrieve_predicted_labels(self, predictions, prompts=None, only_dim=None):
-
-        # convert the predictions to lowercase
+        
+        # TRANSFORMATIONS applied to raw predictions
+        ### convert the predictions to lowercase
         predictions =  list(map(str.lower,predictions))
+        ### remove newlines
+        predictions = [prediction.replace('\n', ' ') for prediction in predictions]
+        ### remove leading and trailing whitespaces
+        predictions = [prediction.strip() for prediction in predictions]
+        ### remove backslashes
+        predictions = [prediction.replace('\\', '') for prediction in predictions]
 
         # retrieve the labels that are contained in the predictions
         predicted_labels = []

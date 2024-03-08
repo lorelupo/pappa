@@ -224,7 +224,7 @@ def annotate_and_evaluate(
             max_dimensions = max(max_dimensions, num_dimensions)
 
         # Step 2: Modify the loop to handle all dimensions dynamically
-        if "multi" in task_file:
+        if eval_dim is not None:
             for dim_index in range(max_dimensions):  # Iterate through all dimensions
                 dim_name = f'dim{dim_index + 1}'  # Dynamically create the dimension name
                 dim_predictions = extract_predictions_for_dim(predictions, dim_index)
@@ -256,7 +256,7 @@ def annotate_and_evaluate(
             df_predicted_labels = pd.DataFrame(predictions, columns=['prediction'])
 
         # Modify df_predicted_labels to include the 'prediction' column based on eval_dim
-        if "multi" in task_file:
+        if eval_dim is not None:
             df_predicted_labels['prediction'] = df_predicted_labels[f'prediction_{eval_dim}'].str.lower()
     
             logger.info(f"DataFrame columns: {df_predicted_labels.columns}")
@@ -281,7 +281,7 @@ def annotate_and_evaluate(
             # Prepare a DataFrame to hold all predictions
             all_predictions_df = sentID_text_df.copy()
 
-            if "multi" in task_file: 
+            if eval_dim is not None: 
 
                 prediction_files = glob.glob(os.path.join(output_dir, 'raw_predictions_dim*.txt'))
 
