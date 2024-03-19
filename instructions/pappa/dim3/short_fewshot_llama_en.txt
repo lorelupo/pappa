@@ -1,0 +1,65 @@
+Label the Swedish text according to how it describes the role of the father in the family.
+Possible labels are: 
+-descriptive: if the sentence describes a state, like “we see that fathers are active”
+-ideal: if the sentence is prescriptive, like “we wish for more active fathers”
+-not_applicable: not applicable.
+
+Here are some labelled examples:
+
+Text: in both cases, the mother is the genetic mother of the child.
+Label: not_applicable
+
+Text: in cases where the social welfare board does not take its responsibility or does not succeed, there must still be the right for close relatives, such as grandparents, to bring an action for access to the district court.
+Label: not_applicable
+
+Text: there is an over-representation among fathers with low education, low income and fathers with a foreign background.
+Label: passive
+
+Text: it is true that there is an imbalance in the withdrawal of parental insurance, but at the same time it is important to state that more fathers are taking parental leave today than before the introduction of the mother and father month.
+Label: active_positive_other
+
+Text: if the child's parents are neither married nor registered as living together at the time of the child's birth, the mother is sole guardian.
+Label: passive
+
+Text: among them were men, women and children, young and old, fathers and mothers, sons and daughters, spouses and siblings.
+Label: not_applicable
+
+Text: the law committee has previously stated that it believes that the current order provides reassuring guarantees that it is indeed the biological father and not someone else who is determined to be the father of a child (0000/00: lu0).
+Label: passive
+
+Text: in isf's report double days - fathers' way into parental allowance, it is concluded that fathers' withdrawals during the child's first year of life have increased and that fathers who previously chose not to take out parental allowance have now started to take out days.
+Label: active_positive_other
+
+Text: as a condition for everything, the child welfare board must be obliged to investigate whether someone other than the husband can be the father, the proposal sets out - except that the child must have some connection to Sweden - partly that the investigation must have been requested by the guardian of the child, d, v, s , normally the mother, or by the husband, partly that it must be suitable.
+Label: passive
+
+Text: through the ``read for me dad'' project, linked to workplace libraries, fathers are encouraged both to read themselves and to read to their children.
+Label: active_positive_challenging
+
+Text: any obligation to approve a foreign judgment on maternity for the child's social or genetic mother, or a foreign judgment on paternity for the male partner of a genetic father, cannot, however, be inferred from the court's current practice.
+Label: passive
+
+Text: here fathers are also encouraged to take responsibility as reading fathers.
+Label: active_positive_challenging
+
+Text: from the children's answers, it can be deduced that mothers generally have more time for their children, regardless of the extent to which they live with their mother, while for the children, it can mean more time with their father when the parents separate than when they live together, provided that they live at least half the time with the father.
+Label: active_positive_other
+
+Text: it is quite possible to communicate about why parenthood is so easily experienced as something that concerns the mother more than the father, why fathers can feel like good enough fathers despite a very low take-up of parental leave, why mothers often think they are better on reading the child than what fathers are, why fathers are perceived as heroes when they do the same thing that mothers do just for the heck of it and a thousand other questions that have to do with parenthood as a recognized position.
+Label: active_positive_caring
+
+Text: then the father is usually portrayed as threatening, violent and as a bad parent.
+Label: active_negative
+
+Text: it is then common for the rapist -- if it was not the father or a close relative who committed the crime -- to pay the girl's parents not to report the case to the police.
+Label: active_negative
+
+Text: in order to make it easier for fathers in particular to increase their withdrawal of parental allowance, it is proposed that the compensation be paid with the amount of the sickness allowance regardless of the other parent's sickness allowance.
+Label: active_positive_other
+
+Text: if parents have a child together in their household, parental allowance above the guarantee level is paid to the father only on the condition that the mother is also or, as previously stated, insured for sickness allowance that exceeds the guarantee level.
+Label: passive
+
+Please label the following text, only answering with the label:
+
+Text: 

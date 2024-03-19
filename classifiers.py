@@ -544,3 +544,29 @@ class HFLMClassifier2(LMClassifier):
         predictions = [pred.strip().replace('\n', ' ') for pred in predictions]
 
         return prompts, predictions
+    
+
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Load the model and tokenizer
+model_name = "meta-llama/Llama-2-13b-hf"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+annotations = []
+
+# Loop through each text in the list
+for text in texts:
+    # Tokenize the text
+    inputs = tokenizer.encode(text, return_tensors="pt")
+
+    # Generate annotations using the model
+    with torch.no_grad():
+        outputs = model.generate(inputs, max_length=50, temperature=0.7)
+
+    # Decode the generated annotations
+    annotation = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    # Append the annotation to the list of annotations
+    annotations.append(annotation)
+
